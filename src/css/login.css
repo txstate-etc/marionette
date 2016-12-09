@@ -1,0 +1,10 @@
+body {
+	text-align: center;
+}
+
+.logincontainer {
+	margin: 300px auto;
+	width: 300px;
+	border: 1px solid black;
+	padding: 10px;
+}

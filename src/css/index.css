@@ -1,0 +1,56 @@
+table.projects td.statusgreen, table.projects td.statusyellow, table.projects td.statusred {
+	width: 30px;
+}
+
+table.projects tr.trow td.status {
+	font-size: 9px;	
+}
+
+table.projects tr.trow a {
+	color: white;
+}
+
+table.projects td.priority {
+	text-align: center;	
+}
+
+table.projects {
+	border-collapse: collapse;
+	margin: 10px 0px;
+}
+
+table.projects td { 
+	font-size: 12px; 
+	padding: 3px;
+	border: 1px solid #555;
+}
+
+table.projects tr.trow td {
+	background-color: black;
+	color: white;
+}
+
+table.projects tr.even {
+	background-color: #DDD;
+}
+table.projects tr.odd {
+	background-color: white;
+}
+
+td.published {
+	background-color: green;
+}
+
+td.notpublished {
+	background-color: red;
+}
+
+a.actionrequired {
+	color: red;
+	font-weight: bold;
+}
+
+.extrainfo {
+	font-size: 9px;
+	color: #555555;
+}

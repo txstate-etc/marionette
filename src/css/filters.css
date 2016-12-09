@@ -1,0 +1,30 @@
+#filterarea {
+	display: none;
+	border: 1px solid #CCCCCC;
+	padding: 10px;
+}
+
+#filtertoggle {
+	text-align: right;
+}
+
+#filtertoggle a {
+	background: url(../images/redright.gif) no-repeat;
+	padding-left: 15px;
+	text-decoration: none;
+	color: darkblue;
+}
+
+#filtertoggle a.open {
+	background: url(../images/reddown.gif) no-repeat;
+}
+
+.singlefilter .calimg {
+	vertical-align: middle;
+}
+
+#addfilterbutton {
+	display: block;
+	padding: 5px 0px;
+	width: 120px;
+}

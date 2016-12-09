@@ -1,0 +1,62 @@
+body, td { font-size: 12px; }
+img { border: none; }
+table { border-collapse: collapse; }
+
+td.statusred {
+	background: url(../images/red_small.gif) no-repeat center center;
+}
+
+td.statusyellow {
+	background: url(../images/yellow_small.gif) no-repeat center center;
+}
+
+td.statusgreen {
+	background: url(../images/green_small.gif) no-repeat center center;
+}
+
+label {
+	clear: both;
+	float: left;
+	width: 120px;
+	text-align: right;
+	padding-right: 5px;
+}
+
+label.cbox {
+	float: none;
+	width: auto;
+	text-align: left;
+	padding-left: 5px;
+}
+
+.tabmenu span.logout {
+	float: right;
+	padding-right: 10px;
+}
+
+span.menuitem {
+	float: left;
+	display: block;
+	width: 75px;
+	border: 1px solid white;
+	background-color: #501214;
+	text-align: center;
+	color: white;
+	padding: 3px;
+}
+
+span.menuitem a {
+	color: white;
+	text-decoration: none;
+}
+
+span.menuitem a:hover {
+	text-decoration: underline;
+}
+
+div#contentdiv {
+	position: relative;
+	border: 1px solid #501214;
+	clear: both;
+	padding: 10px;
+}

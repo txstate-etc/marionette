@@ -1,0 +1,79 @@
+table.usertable {
+	border-collapse: collapse;
+	margin-bottom: 10px;
+}
+
+table.usertable td {
+	border: 1px solid black;
+	padding: 3px;
+}
+
+table.usertable tr.trow td {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+
+table.usertable tr.toprow td.title {
+	font-weight: bold;
+}
+
+table.usertable tr.toprow td.permissions {
+	background-color: darkgreen;
+	color: white;
+	font-weight: bold;
+	text-align: center;
+}
+
+table.usertable tr.trow td.boolean {
+	width: 40px;
+	text-align: center;
+}
+
+table.grouptable {
+	border-collapse: collapse;
+}
+
+table.grouptable td {
+	border: 1px solid black;
+	padding: 3px;
+}
+
+table.grouptable tr.trow td {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+
+table.grouptable tr.toprow td.title {
+	font-weight: bold;
+	width: 200px;
+}
+
+table.grouptable tr.toprow td.permissions {
+	background-color: darkgreen;
+	color: white;
+	font-weight: bold;
+	text-align: center;
+}
+
+table.grouptable tr.trow td.viewpub, table.grouptable tr.trow td.viewcurr, 
+table.grouptable tr.trow td.editcurr, table.grouptable tr.trow td.publish {
+	width: 50px;
+	text-align: center;
+	background-color: darkgreen;
+}
+
+td.granted {
+	background-color: green;
+	text-align: center;
+	font-weight: bold;
+}
+
+td.denied {
+	background-color: red;
+}
+
+td.actions {
+	text-align: center;
+}

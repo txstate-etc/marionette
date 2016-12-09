@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+	<title>BBCode Syntax Help</title>
+	<style type="text/css">
+		body { font-size: 14px; }
+	</style>
+</head>
+<body>
+<h3>Links</h3>
+[url=YOURLINK](YOURTITLE)[/url]<br/><br/>
+Title and end tag are optional.  If YOURTITLE is empty, YOURLINK will be used.
+
+<h3>Images</h3>
+[img=SRC (h=HEIGHT) (w=WIDTH) (float={left|right}) (caption="TEXT")](ALTTEXT)[/img]<br/><br/>
+Anything in parentheses is optional.  Caption styling should be done in the page's CSS, the class is "bbcode_caption".
+
+<h3>Objects (Flash/Quicktime)</h3>
+[object=SRC (h=HEIGHT) (w=WIDTH) (parameters=values)](ALTTEXT)[/object]<br/><br/>
+Anything in parentheses is optional.  You may include extra parameters such as autostart="1" and they will be passed along to the object.
+
+<h3>Code Blocks</h3>
+[code]YOURCODE[/code]<br/>
+
+<h3>Quotations</h3>
+[quote(=PERSONQUOTED)]QUOTEDTEXT[/quote]<br/>
+
+<h3>Headers / Dividers</h3>
+[h{1-6}]HEADERTEXT[/h{1-6}]<br/>
+[hr] (closing tag optional)<br/>
+[clear] (closing tag optional)<br/><br/>
+Makes sure anything following the [clear] appears below any floating elements (like images).
+
+<h3>Various Style Options</h3>
+[class=CSSCLASS]STYLEDTEXT[/class]<br/>
+[{b|i|u|s}]BOLDUNDERLINESTRIKETEXT[/{b|i|u|s}]<br/>
+[strong]STRONGTEXT[/strong]<br/>
+[em]EMPHASIZEDTEXT[/em]<br/>
+[color=#FF0000]REDTEXT[/color]<br/>
+[size=2]DOUBLESIZETEXT[/size]<br/>
+[small]SMALLTEXT[/small]<br/>
+[big]BIGTEXT[/big]<br/>
+
+</body>
+</html>

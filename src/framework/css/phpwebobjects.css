@@ -1,0 +1,49 @@
+.formerrors {
+	color: red;
+	margin-bottom: 7px;
+}
+
+.olib_trow, .tip_trow {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+
+.olib_main, .tip_main {
+	background-color: white;
+	color: black;
+}
+
+.clearbothdiv {
+	clear: both;
+}
+
+label.checkbox {
+	float: none;
+	display: inline;
+	font-weight: normal;
+}
+
+img.inlinecorrect {
+	margin-bottom: -3px;
+}
+
+.wikimarkup .imgleft { 
+	float: left; 
+	margin-right: 6px; 
+	margin-bottom: 6px; 
+} 
+.wikimarkup .imgright { 
+	float: right; 
+	margin-left: 6px; 
+	margin-bottom: 6px; 
+}
+.wikimarkup .verbatim { 
+	font-family: Courier, monospace; 
+}
+
+.pwo_column {
+	position: relative;
+	float: left;
+	margin-right: 5px;
+}

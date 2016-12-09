@@ -1,0 +1,404 @@
+<html>
+<head>
+<title>Wiki Formatting Help</title>
+<style type="text/css">
+/***************************** GLOBAL **************************** 
+/ Here are the global rules, used everywhere on the page. */
+body
+	{
+	background-color: white;
+	color		: #444;
+	margin		: 0;
+	padding		: 0;
+	font-family	: sans-serif;
+	overflow	: scroll;  /* Avoids dancing menu */
+	overflow-x	: auto; /* IE: horizontal bar is sooo large */
+	}
+
+/* Links are underlined only when the cursor is over them */
+a
+	{
+	text-decoration	: none;
+	}
+a:link
+	{
+	color		: blue;
+	font-weight	: bold;
+	}
+a:hover
+	{
+	text-decoration	: underline;
+	background 		: #ccf;
+	}
+a:visited
+	{
+	color		: #66f;
+	}
+
+/* That nice green background on some words and code samples */
+code
+	{
+	background-color: #eee;
+	border		: 1px dotted #ddd;
+	}
+pre
+	{
+	background-color: #eee;
+	margin-left	: 3em;
+	margin-right	: 2em;
+	padding		: 8px;
+	border		: 1px outset gray;
+	}
+blockquote
+	{
+	border: 1px solid #999;
+	padding: 4px;
+	}
+
+/* Tables are used by: docs, sample */
+table
+	{
+	font-size	: 100%; /* Needed to inherit the body font size*/
+	border-color	: #ccc;
+	}
+th
+	{
+	background-color: #ddd;
+	padding		: .5em 0;
+	border-color	: #ccc;
+	border-style	: solid;
+	}
+td
+	{
+	border-style	: none;
+	padding		: .2em .5em;
+	}
+.verbatim {
+	
+}
+.imgleft { float: left; margin-right: 6px; margin-bottom: 6px; }
+.imgright { float: right; margin-left: 6px; margin-bottom: 6px; }
+.verbatim { font-family: monospace; }
+</style>
+</head>
+<body>
+<br/>
+<table border=1>
+<tr><th colspan="2">
+BASIC
+</th></tr><tr><td class="t2t">
+<PRE>
+
+= Title level 1 =
+
+== Title level 2 ==
+
+=== Title level 3 ===
+</PRE>
+</td><td>
+<H1>Title level 1</H1>
+<H2>Title level 2</H2>
+<H3>Title level 3</H3>
+</td></tr><tr><td class="t2t">
+
+<PRE>
+
++ Numbered Title level 1 +
+
+++ Numbered Title level 2 ++
+
++++ Numbered Title level 3 +++
+</PRE>
+</td><td>
+<H1>1. Numbered Title level 1</H1>
+<H2>1.1. Numbered Title level 2</H2>
+<H3>1.1.1. Numbered Title level 3</H3>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+A paragraph is made by one or
+more lines.
+
+A blank line separates them.
+</PRE>
+</td><td>
+
+<P>
+A paragraph is made by one or
+more lines.
+</P>
+<P>
+A blank line separates them.
+</P>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+% start a line with
+a percent sign,
+% and it will be ignored
+useful for TODOs!
+</PRE>
+</td><td>
+<P>
+a percent sign,
+useful for TODOs!
+</P>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+For beautifiers we have 
+''bold'' (double single-quotes) and
+'''italic''' (triple single-quotes).
+
+There is also __underline__, --strike--
+and ``monospaced``.
+</PRE>
+</td><td>
+<P>
+For beautifiers we have <B>bold</B> (double single-quotes)
+and <I>italic</I> (triple single-quotes).
+</P>
+<P>
+There is also <U>underline</U>, <S>strike</S>
+
+and <CODE>monospaced</CODE>.
+</P>
+</td></tr><tr><th colspan="2">
+LISTS
+</th></tr><tr><td class="t2t">
+<PRE>
+* This is a list of items
+* Just use asterisks
+** More asterisks open a sublist
+
+A blank line closes all lists.
+</PRE>
+</td><td>
+<UL>
+<LI>This is a list of items</LI>
+<LI>Just use asterisks
+  <UL>
+  <LI>More indent opens a sublist</LI>
+  </UL>
+</LI>
+</UL>
+
+<P>A blank line closes all lists.</P>
+</td></tr><tr><td class="t2t">
+<PRE>
++ Exchange the asterisk for a plus
+++ And you have a numbered list
+++ Same rules apply
+
+A blank line closes all lists.
+</PRE>
+</td><td>
+<OL>
+<LI>Exchange the asterisk for a plus
+  <OL>
+	<LI>And you have a numbered list</LI>
+  <LI>Same rules apply</LI>
+  </OL>
+</LI>
+</OL>
+
+<P>
+A blank line closes all lists.
+</P>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+: Definition list
+  A list with terms
+: Start term with colon
+  And its definition follows
+:
+</PRE>
+</td><td>
+<DL>
+<DT>Definition list</DT><DD>
+  A list with terms
+<DT>Start term with colon</DT><DD>
+
+  And its definition follows
+</DL>
+
+</td></tr><tr><th colspan="2">
+AREAS
+</th></tr><tr><td class="t2t">
+<PRE>
+>A quoted paragraph is prefixed
+>by a greater than (&gt;).
+>>More greater thans, more deep.
+
+>Don't really even need
+the quote on subsequent
+lines.
+
+A blank line closes everything.
+
+> Use the greater than
+> symbol on a blank line.
+>
+> That will let you maintain it
+> across multiple paragraphs.
+</PRE>
+</td><td>
+	<BLOCKQUOTE>
+		A quoted paragraph is prefixed
+		by a greater than (&gt;).
+		<BLOCKQUOTE>More greater thans, more deep.</BLOCKQUOTE>
+	</BLOCKQUOTE>
+	<BLOCKQUOTE>
+		Don't really even need
+		the quote on subsequent
+		lines.
+	</BLOCKQUOTE>
+<P>A blank line closes everything.</P>
+	<BLOCKQUOTE>
+		Use the greater than
+		symbol on a blank line.
+		<br/><br/>
+		That will let you maintain it
+		across multiple paragraphs.
+	</BLOCKQUOTE>
+</td></tr><tr><td class="t2t">
+<PRE>
+```
+  A verbatim area is enclosed
+      inside three backquotes.
+**Marks** are not interpreted
+     and spacing is preserved.
+```
+</PRE>
+</td><td>
+<div class="verbatim">
+&nbsp;&nbsp;A verbatim area is enclosed<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inside three backquotes.<br/>
+**Marks** are not interpreted<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and spacing is preserved.<br/>
+</div>
+</td></tr><tr><td class="t2t">
+<PRE>
+````
+  A verbatim area enclosed
+   by four backquotes goes
+        into a code block.
+````
+</PRE>
+</td><td>
+<code>&nbsp;&nbsp;A verbatim area enclosed<br/>
+&nbsp;&nbsp;&nbsp;by four backquotes goes<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;into a code block.</code>
+</td></tr><tr><td class="t2t">
+<PRE>
+Verbatim line is nice for commands:
+```` $ cat /etc/passwd | tr : ,
+Just prefix it with 3 or 4 backquotes
+(4 for a code block).
+</PRE>
+</td><td>
+<P>Verbatim line is nice for commands:</P>
+<code>$ cat /etc/passwd | tr : ,</code>
+<P>Just prefix it with 3 or 4 backquotes
+(4 for a code block).</P>
+</td></tr><tr><th colspan="2">
+OTHER
+</th></tr><tr><td class="t2t">
+<PRE>
+|| Table Heading | Table Heading |
+|          Table |     align     |
+|          lines |      is       |
+|      with cell |     nice!     |
+</PRE>
+</td><td>
+<TABLE BORDER="1">
+<TR>
+<TH>Table Heading</TH>
+<TH>Table Heading</TH>
+</TR>
+<TR>
+<TD ALIGN="right">Table</TD>
+<TD ALIGN="center">align</TD>
+
+</TR>
+<TR>
+<TD ALIGN="right">lines</TD>
+<TD ALIGN="center">is</TD>
+</TR>
+<TR>
+<TD ALIGN="right">with cell</TD>
+<TD ALIGN="center">nice!</TD>
+</TR>
+</TABLE>
+
+</td></tr><tr><td class="t2t">
+<PRE>
+
+[t2t.png] Left aligned image
+
+Center [t2t.png] aligned
+
+Right aligned with alt
+text specified.
+[Set the alt text t2t.png]
+</PRE>
+</td><td>
+<P>
+<IMG width="50" height="40" class="imgleft" SRC="img/t2tpowered.png" title="O>OOOO" BORDER="0" ALT=""> Left aligned image
+</P>
+<br clear="all"/>
+<P>
+Center <IMG width="50" height="40" SRC="img/t2tpowered.png" title="O>OOOO" BORDER="0" ALT=""> aligned
+</P>
+<P>
+<IMG class="imgright" width="50" height="40" SRC="img/t2tpowered.png" title="O>OOOO" BORDER="0" ALT="Set the alt text">Right aligned with alt text specified.
+</P>
+<br clear="all"/>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+A link is [surroundedby@brackets.see]?
+
+A [named link www.myurl.com] is easy.
+
+An image [[t2t.png] as-a-link.html].
+</PRE>
+</td><td>
+<P>
+A link is <A HREF="mailto:surroundedby@brackets.see">surroundedby@brackets.see</A>?
+</P>
+<P>
+A <A HREF="http://www.myurl.com">named link</A> is easy.
+</P>
+
+<P>
+An image <A HREF="as-a-link.html"><IMG width="50" height="50" ALIGN="middle" SRC="img/t2tpowered.png" title="O>OOOO" BORDER="0" ALT=""></A>.
+</P>
+</td></tr><tr><td class="t2t">
+<PRE>
+
+A separator line:
+--------------------
+And a stronger one:
+====================
+(At least 10 chars)
+</PRE>
+</td><td>
+<P>
+A separator line:
+</P>
+<HR NOSHADE SIZE=1>
+<P>
+And a stronger one:
+</P>
+
+<HR NOSHADE SIZE=5>
+<P>
+(At least 20 chars)
+</P>
+</td></tr>
+</table>
+<br/><br/>
+</body>
+</html>

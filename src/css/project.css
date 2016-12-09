@@ -1,0 +1,168 @@
+@CHARSET "UTF-8";
+
+table.aspecttable {
+	margin: 10px 0px;
+	width: 650px;
+}
+
+table.aspecttable td {
+	border: 1px solid black;
+	padding: 2px;
+}
+
+table.aspecttable tr.trow td {
+	background-color: black;
+	color: white;
+	font-weight: bold;	
+}
+
+table.aspecttable td.statusgreen, table.aspecttable td.statusyellow, table.aspecttable td.statusred {
+	width: 35px;
+	text-align: right;
+}
+
+table.aspecttable td.goal {
+	background-color: #CCC;
+	width: 150px;
+}
+
+table.aspecttable td.goal .goaltitle {
+	font-weight: bold;
+}
+
+td.aspect {
+	font-style: italic;
+}
+
+table.infotable {
+	width: 650px;
+}
+
+table.infotable td.col1 {
+	font-weight: bold;
+	padding-right: 10px;
+	width: 125px;
+	vertical-align: top;
+}
+
+table.historytable {
+	margin: 10px 0px;
+	width: 800px;
+}
+
+table.historytable td {
+	border: 1px solid black;
+	padding: 2px;
+}
+table.historytable td.comment {
+	padding: 4px;
+}
+
+table.historytable tr.trow td {
+	background-color: black;
+	color: white;
+	font-weight: bold;	
+}
+
+table.historytable td.statusgreen, table.publishtable td.statusyellow, table.publishtable td.statusred {
+	width: 30px;
+}
+
+table.historytable tr.even {
+	background-color: #DDD;
+}
+table.historytable tr.odd {
+	background-color: #FFF;
+}
+
+table.historytable td.aspect, table.historytable td.flexibility, table.historytable td.trend, 
+table.historytable td.risk, table.historytable td.mitigation {
+	font-size: 10px;
+}
+
+table.historytable .attachments {
+	display: none;
+	text-align: right;
+}
+table.historytable .attach_expand {
+	display: block;
+	text-align: right;
+}
+
+form.bottombutton {
+	margin-top: 10px;
+}
+
+#oldpublish {
+	font-style: italic;
+	padding-bottom: 6px;
+}
+
+.asterisk {
+	color: red;
+}
+
+.attach_deleted {
+	color: #AAA;
+	font-style: italic;
+}
+
+div.sidebar {
+	position: absolute;
+	left: 485px;
+	top: 20px;
+	width: 175px;
+}
+
+div.sidebar ul {
+	list-style-type: none;
+	padding: 0px;
+	text-align: center;
+	border-top: 1px solid #501214;
+}
+
+div.sidebar li {
+}
+
+div.sidebar a {
+	text-decoration: none;
+	color: black;
+	font-size: 14px;
+	display: block;
+	padding: 3px;
+	border: 1px solid #501214;
+	border-top: none;
+}
+
+div.sidebar a:hover {
+	background-color: #EEEEEE;
+}
+
+div.commentdiv {
+	position: relative;
+	width: 650px;
+}
+
+div.commentauthor {
+	float: right;
+	font-size: 11px;
+	padding-right: 3px;
+}
+
+div.commentstamp {
+	float: left;
+	font-size: 11px;
+	padding-left: 3px;
+}
+
+div.commenttext {
+	clear: both;
+	border: 1px solid #CCCCCC;
+	border: 1px solid #501214;
+	padding: 8px;
+	margin-bottom: 10px;
+}
+
+fieldset.commentfs {
+	border: 1px solid #501214;
+}

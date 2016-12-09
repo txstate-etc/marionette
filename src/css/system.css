@@ -1,0 +1,90 @@
+#invisdiv {
+	width: 900px;
+}
+
+.traitsform {
+	float: left;
+	width: 400px;
+}
+
+table.traitlist {
+	width: 100%;
+}
+
+table.traitlist tr.trow {
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+
+table.traitlist td.move, table.traitlist td.edit, table.traitlist td.del {
+	text-align: center;
+	width: 25px;
+}
+
+ul.area li {
+	margin: 0px;
+	padding: 0px;	
+}
+
+li.above {
+	height: 3px;
+	background-color: white;
+	list-style-type: none;
+	margin-left: -15px;
+}
+
+li.above_hilite {
+	height: 3px;
+	background-color: black;
+	list-style-type: none;
+	margin-left: -15px;
+}
+
+span.area_item {
+	display: block;
+	cursor: move;
+}
+
+span.area_item_hilite {
+	display: block;
+	background-color: yellow;
+}
+
+div.submitdiv {
+	text-align: center;
+}
+
+input.area_save_button {
+	margin-left: 5px;
+}
+
+.trash {
+	display: block;
+	float: right;
+	width: 30px;
+	height: 30px;
+	background: url(../images/trash-grey.gif) top center no-repeat;	
+}
+
+.trash_hilite {
+	background: url(../images/trash-yellow.gif) top center no-repeat;
+}
+
+.instruction {
+	font-style: italic;
+}
+
+.areaform {
+	width: 800px;
+}
+
+.area_manager {
+	color: #333333;
+	font-style: italic;
+}
+
+.areamanslct {
+	font-size: 10px;
+	margin-left: 5px;
+}

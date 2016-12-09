@@ -1,0 +1,20 @@
+web:
+  build: .
+  links:
+    - db
+  ports:
+    - "80:80"
+  volumes:
+    - ./src:/var/www/html
+db:
+  image: mysql
+  command: mysqld --sql_mode=""
+  ports:
+    - "3306:3306"
+  volumes:
+    - marionettedata:/var/lib/mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: 123456
+    MYSQL_USER: dev
+    MYSQL_PASSWORD: 123456
+    MYSQL_DATABASE: marionette
