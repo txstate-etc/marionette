@@ -4,7 +4,7 @@
  * @author Nick Wing
  * @version 0.3
  */
- 
+
 /**
  * HTML Form
  *
@@ -22,7 +22,7 @@ class form extends container {
 	public $preload = TRUE;
 	public $preloadspecified = FALSE;
 	private $errors = array();
-	
+
 	/**
 	 * Construct a form object
 	 *
@@ -48,14 +48,14 @@ class form extends container {
 		$this->settarget($target);
 		if ($name) $this->setname($name);
 	}
-	
+
 	/**
 	 * Return form's name
 	 *
 	 * @return string
 	 */
 	public function getname() { return $this->name; }
-	
+
 	/**
 	 * Set form's name
 	 *
@@ -79,23 +79,23 @@ class form extends container {
 	 * You can configure the location of the secret key file by setting the
 	 * global $cfg['secret_key_directory'].
 	 *
-	 * I wouldn't recommend using this key for password hashing salts or 
-	 * anything like that, because if the file gets wiped for any reason, 
+	 * I wouldn't recommend using this key for password hashing salts or
+	 * anything like that, because if the file gets wiped for any reason,
 	 * you'd lose all your salted passwords.  For the purpose of error-check
 	 * signing, the key only needs to last long enough for a user to complete
 	 * a form. If the key is regenerated, the only risk is that a few
 	 * users will have to submit their form twice.
-	 * 
+	 *
 	 * @return string
 	 */
 	public static function get_secret_key() {
 		static $secretkey;
 		if ($secretkey) return $secretkey;
-		
+
 		// do we have a configured key directory?
 		global $cfg;
 		$keydir[0] = $cfg['secret_key_directory'];
-		
+
 		// if the configuration global is not set or is bogus, we'll
 		// try the directory where php is saving session data
 		$keydir[1] = session_save_path();
@@ -103,13 +103,13 @@ class form extends container {
 		// a semicolon
 		if (strpos ($keydir[1], ";") !== FALSE)
   		$keydir[1] = substr ($keydir[1], strpos ($keydir[1], ";")+1);
-		
+
 		// if the php session save path is bogus, we'll try to acquire the
 		// proper temp directory
 		if (function_exists('sys_get_temp_dir'))
 			$keydir[2] = sys_get_temp_dir();
 		else $keydir[2] = '/tmp';
-		
+
 		// try writing to each location and use the first one
 		// that succeeds
 		$level = error_reporting(0);
@@ -129,20 +129,20 @@ class form extends container {
 		if ($secretkey) return $secretkey;
 		return 'ahUw7M9Jz3Plv42';
 	}
-	
+
 	/**
 	 * Hash the error checking authentication string
 	 *
 	 * Hashing methods evolve and improve, this function may eventually
 	 * shift to a new algorithm.
-	 * 
+	 *
 	 * @return string
 	 * @access private
 	 */
 	public static function apply_hashing($str) {
 		return md5($str);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -151,16 +151,16 @@ class form extends container {
 		sort($pairs);
 		return implode('-',$pairs);
 	}
-	
+
 	/**
 	 * Check form for errors
 	 *
 	 * This is a piece of the automatic error checking system.  Most PHP
 	 * programmers who put the form and the form processing on the same
 	 * page will want to replace <pre>if ($_REQUEST['submit']) {</pre> with
-	 * <pre>if (form::check_error()) {</pre>  
+	 * <pre>if (form::check_error()) {</pre>
 	 *
-	 * The form will automatically report its own errors and preload 
+	 * The form will automatically report its own errors and preload
 	 * its values as it is printed, so handling form errors
 	 * is very simple with this method.
 	 *
@@ -172,7 +172,7 @@ class form extends container {
 	 *     $form = new form($doc, 'myform');
 	 *     // generate the rest of the form
 	 * }</pre>
-	 * 
+	 *
 	 * The $dupe_timer parameter can be used to prevent duplicate form submissions
 	 * that occur close together.  Specify a number of seconds, and check_error() will simply
 	 * return FALSE for any repeated form submissions that occur within that many seconds from
@@ -183,8 +183,8 @@ class form extends container {
 	 * @return bool
 	 */
 	public static function check_error($formname='', $dupe_timer = 0) {
-		if ((!$_REQUEST['pwo_submit'] && !$_REQUEST['pwo_submit_x'] && !$_REQUEST['pwo_submit_y']) || (($_REQUEST['whichform'] != $formname) && $formname)) return FALSE;		
-		
+		if ((!$_REQUEST['pwo_submit'] && !$_REQUEST['pwo_submit_x'] && !$_REQUEST['pwo_submit_y']) || (($_REQUEST['whichform'] != $formname) && $formname)) return FALSE;
+
 		$secretkey = form::get_secret_key();
 		// let's make sure this is an authentic error checking profile
 		foreach ($_REQUEST as $key => $valu) {
@@ -199,8 +199,8 @@ class form extends container {
 		$checkboth = form::apply_sorting($checkboth);
 		$checkstr = $checkboth.$formname.$secretkey;
 		$hashkey = form::apply_hashing($checkstr);
-		if ($hashkey != $_REQUEST['errorcheck_auth']) return FALSE;	
-				
+		if ($hashkey != $_REQUEST['errorcheck_auth']) return FALSE;
+
 		// start session so we can get access
 		if ($dupe_timer && doc::start_php_session()) {
 			// check to see whether this is a dupe submission
@@ -211,7 +211,7 @@ class form extends container {
 			// register the hashkey in the session
 			$_SESSION[$hashkey] = microtime(TRUE);
 		}
-		
+
 		$arr = (array) $_REQUEST['check_required'];
 		foreach($arr as $req) {
 			if (!$_REQUEST[$req] && !is_array($_FILES[$req]) && !$_REQUEST['check_disabled_'.$req]) { return FALSE; }
@@ -229,12 +229,12 @@ class form extends container {
 		foreach($arr as $ifmethen) {
 			list ($me, $then) = explode('|', $ifmethen);
 			if ($_REQUEST[$me] && !$_REQUEST[$then]) return FALSE;
-		}		
+		}
 		$arr = (array) $_REQUEST['check_ifnotmethen'];
 		foreach($arr as $ifmethen) {
 			list ($me, $then) = explode('|', $ifmethen);
 			if (!$_REQUEST[$me] && !$_REQUEST[$then]) return FALSE;
-		}		
+		}
 		$arr = (array) $_REQUEST['check_length'];
 		foreach($arr as $lendef) {
 			list ($name, $len) = explode('|', $lendef);
@@ -251,7 +251,7 @@ class form extends container {
 		foreach($arr as $lendef) {
 			list ($name, $len) = explode('|', $lendef);
 			if ($_FILES[$name]['size'] > $len*1024) return FALSE;
-		}		
+		}
 		$arr = (array) $_REQUEST['check_tinytext'];
 		foreach($arr as $tinytext) {
 			if (!form::validate_tinytext($_REQUEST[$tinytext])) return FALSE;
@@ -268,13 +268,13 @@ class form extends container {
 		foreach($arr as $mindef) {
 			list ($name, $min) = explode('|', $mindef);
 			if ($_REQUEST[$name] != '' && $_REQUEST[$name] < $min) return FALSE;
-		}		
+		}
 		$arr = $_REQUEST['check_max'];
 		if (!is_array($arr)) $arr = array();
 		foreach($arr as $maxdef) {
 			list ($name, $max) = explode('|', $maxdef);
 			if ($_REQUEST[$name] > $max) return FALSE;
-		}		
+		}
 		$arr = (array) $_REQUEST['check_key'];
 		foreach($arr as $key) {
 			if (!form::validate_key($_REQUEST[$key])) return FALSE;
@@ -287,14 +287,14 @@ class form extends container {
 		foreach($arr as $email) {
 			if (!form::validate_email($_REQUEST[$email]) && $_REQUEST[$email]) return FALSE;
 		}
-		
+
 		// check_match()
 		$arr = (array) $_REQUEST['check_match'];
 		foreach($arr as $entry) {
 			list ($name, $othername) = explode('|', $entry);
 			if ($_REQUEST[$othername] != $_REQUEST[$name]) return FALSE;
 		}
-		
+
 		// check_regex()
 		$arr = (array) $_REQUEST['check_regex'];
 		foreach($arr as $entry) {
@@ -314,12 +314,12 @@ class form extends container {
 			$error = call_user_func_array($cb, $info);
 			if ($error) return FALSE;
 		}
-		
+
 		return TRUE;
 	}
-	
+
 	/**
-	 * This is for form elements to use when they want an error message to be shown 
+	 * This is for form elements to use when they want an error message to be shown
 	 * at the top of the form.
 	 * @access private
 	 */
@@ -327,7 +327,7 @@ class form extends container {
 		if (!is_array($errors)) $errors = array($errors);
 		foreach ($errors as $error) $this->errors[] = $error;
 	}
-	
+
 	/**
 	 * Add data to a form as hidden variables
 	 *
@@ -346,7 +346,7 @@ class form extends container {
 			new hidden($this, $prefix.$key, $val);
 		}
 	}
-	
+
 	/**
 	 * Mimic current form data
 	 *
@@ -363,7 +363,7 @@ class form extends container {
 	public function mimic_data($prefix = '') {
 		$this->add_data(doc::create_mimic(), $prefix);
 	}
-	
+
 	/**
 	 * Retain redirection info
 	 *
@@ -379,7 +379,7 @@ class form extends container {
 	public function redirect_persist() {
 		$this->add_data(self::redirect_persist_vars());
 	}
-	
+
 	public static function redirect_persist_vars() {
 		$vars = array();
 		foreach(doc::create_mimic() as $key => $val) {
@@ -387,7 +387,7 @@ class form extends container {
 		}
 		return $vars;
 	}
-	
+
 	/**
 	 * Save information about the current page
 	 *
@@ -400,12 +400,12 @@ class form extends container {
 	 *
 	 * // inside login.php, during elicitation
 	 * $form->redirect_persist();
-	 * 
+	 *
 	 * // inside login.php, after their password clears
 	 * $info = form::redirect_undo();
 	 * $doc->addText('Login successful, returning you to where you were.');
 	 * $doc->refresh(1, $info['href'], $info['vars']);</pre>
-	 * 
+	 *
 	 * @static
 	 * @return array
 	 */
@@ -416,7 +416,7 @@ class form extends container {
 		$ret['redirectionscript'] = $_SERVER['PHP_SELF'];
 		return $ret;
 	}
-	
+
 	/**
 	 * Retrieve redirection information
 	 *
@@ -436,7 +436,7 @@ class form extends container {
 		$href = $_REQUEST['redirectionscript'];
 		return array('href'=>$href, 'vars'=>$ret);
 	}
-	
+
 	/**
 	 * deprecated in favor of the redirect_*() methods
 	 * @access private
@@ -445,7 +445,7 @@ class form extends container {
 		$this->mimic_data('redirection_');
 		new hidden($this, 'redirectionscript', $_REQUEST['redirectionscript']);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -466,13 +466,13 @@ class form extends container {
 	public static function validate_key($val) {
 		return !preg_match('/[^\w\-]/', $val);
 	}
-			 
+
 	/**
 	 * Set the URL to which to send form data
 	 *
 	 * This corresponds to the "action" HTML attribute.  Defaults
 	 * to PHP_SELF.
-	 * 
+	 *
 	 * @param string $target
 	 */
 	public function settarget($target) {
@@ -486,7 +486,7 @@ class form extends container {
 			$this->target = $_SERVER['PHP_SELF'];
 		}
 	}
-	
+
 	/**
 	 * Choose GET or POST
 	 *
@@ -498,26 +498,26 @@ class form extends container {
 	public function setmethod($method) {
 		$this->method = $method;
 	}
-	
+
 	/**
 	 * Open form result in new window
 	 *
 	 * This will throw a target="_blank" into the form so that it opens
 	 * a new window when the user submits.
-	 * 
+	 *
 	 * @return void
 	 */
 	public function newwindow() {
 		$this->newwindow = TRUE;
 	}
-	
+
 	/**
 	 * Use Javascript to prevent multiple submissions
-	 * 
+	 *
 	 * This method will cause the form to write itself some javascript that prevents
 	 * users from accidentally submitting duplicate forms by double-clicking or other such
 	 * nonsense.
-	 * 
+	 *
 	 * @param bool $flag
 	 * @return void
 	 */
@@ -527,8 +527,8 @@ class form extends container {
 
 	/**
 	 * Generate recursive Javascript-powered select boxes.
-	 * 
-	 * This generates a number of select boxes that are linked by 
+	 *
+	 * This generates a number of select boxes that are linked by
 	 * javascript to create a deep menu.  When you choose a value
 	 * from the first box, the second box gets a whole new set of
 	 * options.  When you choose something from the second box, the
@@ -536,7 +536,7 @@ class form extends container {
 	 *
 	 * This function will generate as many boxes as you provide data
 	 * for, but keep in mind that the amount of data involved with such
-	 * recursion could grow very large and translate to a lot of 
+	 * recursion could grow very large and translate to a lot of
 	 * transfer time for the client.
 	 *
 	 * Just pass a big array full of data, and then form names for all the
@@ -582,9 +582,9 @@ class form extends container {
 		if (!$this->getname()) $this->setname("recurseform");
 		$formname = $this->getname();
 		//if (count($args) != $depth + 1) return array();
-		
+
 		static $start = 0;
-		
+
 		if ($start == 0) $java = "var names=new Array(); var fdepth=new Array();";
 		foreach ($args as $i => $arg) {
 			if ($i > 0) {
@@ -600,33 +600,33 @@ class form extends container {
 				$names[$i-1] = $arg;
 			}
 		}
-		
+
 		$selects[0]->addOption("", "------------");
 		foreach (array_keys($data) as $firstval) {
 			list ($value, $label) = explode('%|%', $firstval);
 			$selects[0]->addOption($value, $label);
 		}
 		if ($_REQUEST[$names[0]]) $selects[0]->setSelected($_REQUEST[$names[0]]);
-		
+
 		for ($i = 1; $i < $depth; $i++) {
 			$doc->addJS_afterload("reloadmenu(".($i+$start).", document.$formname);");
 			$doc->addJS_afterload("document.$formname.".$names[$i].".value='" . addslashes($_REQUEST[$names[$i]]) . "';");
 		}
-		
+
 		$java .= form::writelinkedjava($data, $names, 0, $tracki);
 		$doc->addJS($java);
 		$doc->includeJS("@reloadmenu.js");
 		$start += count($args) - 1;
 		return $selects;
 	}
-	
+
 	/**
 	 * Set form not to preload data
 	 *
 	 * You may use this to toggle off automatic preloading for an entire form.  Individual
-	 * form elements can be toggled with their own methods, but this will make sure the 
+	 * form elements can be toggled with their own methods, but this will make sure the
 	 * whole form is not preloaded.
-	 * 
+	 *
 	 * @param bool $flag
 	 */
 	public function nopreload($flag = TRUE) {
@@ -635,11 +635,11 @@ class form extends container {
 
 	/**
 	 * @access private
-	 */	
+	 */
 	public function preloading() {
 		return ($this->preload);
 	}
-	
+
 	/**
 	 * Recursive helper function for getlinkedselects()
 	 * @access private
@@ -661,7 +661,7 @@ class form extends container {
 		if ($depth > 0) $javascript .= "end" . $names[$depth] . "[" . $tracki[$depth-1] . "]=" . $i . ";";
 		return $javascript;
 	}
-		
+
 	/**
 	 * Make sure form can handle uploads
 	 * @access private
@@ -670,7 +670,7 @@ class form extends container {
 		$this->method = "post";
 		$this->enctype = "multipart/form-data";
 	}
-	
+
 	/**
 	 * Is our target secure?
 	 * @access private
@@ -681,7 +681,7 @@ class form extends container {
 		if (doc::issecure()) $secure = TRUE;
 		return $secure;
 	}
-		
+
 	/**
 	 * @access private
 	 */
@@ -695,7 +695,7 @@ class form extends container {
 			$doc->addJS_afterload('document.getElementById(\''.$this->getid().'\').submitted=0');
 		}
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -719,7 +719,7 @@ class form extends container {
 		if (!empty($this->errors)) $errors = '<div class="formerrors">'.implode("<br/>", array_unique($this->errors)).'</div>';
 		if ($this->newwindow) $target = ' target="_blank"';
 		$children = container::output($pspace, $optin);
-				
+
 		// create the authentication key
 		global $cfg;
 		$secretkey = form::get_secret_key();
@@ -727,43 +727,43 @@ class form extends container {
 		$checkstr = $checkboth.$this->getname().$secretkey;
 		$hashkey = form::apply_hashing($checkstr);
 		$authipt = "\n".$pspace.'<input type="hidden" name="errorcheck_auth" value="'.$hashkey.'" />';
-		
+
 		return '<form' . element::output() . $target . ' action="' . $this->target . '" method="' . strtolower($this->method) . '"' . $enctype . '>'. $authipt . $errors . $children .'</form>';
 	}
 }
 
 /**
  * Uploaded File
- * 
+ *
  * This class contains information about, and is able to manipulate
  * uploaded files.
- * 
+ *
  * @package htmlform
  */
-class file {	
+class file {
 	private $info;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * The $name parameter will be passed to $this->setname()
-	 * 
+	 *
 	 * @param string $name
 	 */
 	function __construct($name) {
 		$this->setname($name);
 	}
-	
+
 	/**
 	 * Set form element name under which this file was uploaded
-	 * 
+	 *
 	 * This class supports two types of form elements.  A filebrowser element
 	 * is the traditional way to upload a file.
-	 * 
+	 *
 	 * However, you could also use a textbox to elicit a URL and this class
 	 * will go grab the data from the internet and treat it like a file
 	 * upload.
-	 * 
+	 *
 	 * @param $name
 	 * @return void
 	 */
@@ -781,28 +781,28 @@ class file {
 		}
 		error_reporting($level);
 	}
-	
+
 	/**
 	 * Get the filename of the file
-	 * 
+	 *
 	 * If you've made a call to unique_in_directory() or unique_in_array(), this
 	 * filename will have been modified from the original.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function filename() {
 		return $this->info['filename'];
 	}
-	
+
 	/**
 	 * Get the file data
-	 * 
+	 *
 	 * @return binary
 	 */
 	public function data() {
 		return $this->info['data'];
 	}
-	
+
 	/**
 	 * Get the file's type extension
 	 *
@@ -835,36 +835,36 @@ class file {
 			default: return file_extension($this->filename());
 		}
 	}
-	
+
 	public function mime_type() {
 		if ($this->info['imgdata']) return $this->info['imgdata']['mime'];
 		else return 'application/octet-stream';
 	}
-	
+
 	public function height() {
 		return $this->info['imgdata'][1];
 	}
-	
+
 	public function width() {
 		return $this->info['imgdata'][0];
 	}
-	
+
 	public function size() {
 		return sprintf("%.2f", strlen($this->data()) / 1024);
 	}
-	
+
 	/**
 	 * Detect a manipulable image
 	 *
 	 * Returns true if the gd library can load the file data as
 	 * an image.
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function is_image() {
 		return (bool) $this->gd_resource();
 	}
-	
+
 	/**
 	 * Get a gd resource object for the file, if applicable
 	 *
@@ -884,7 +884,7 @@ class file {
 		}
 		return $this->info['gd_resource'];
 	}
-	
+
 	/**
 	 * Get a resized JPEG version of the file
 	 *
@@ -910,19 +910,19 @@ class file {
 	public function resized_data($max_width = 120, $max_height = 160, $quality = 60) {
 		return resize_image($this->gd_resource(), $max_width, $max_height, $quality);
 	}
-	
+
 	/**
 	 * Ensure filename is unique in a particular directory
-	 * 
+	 *
 	 * This will alter the filename of this object until it no longer matches
 	 * anything in the given directory.  This will prevent naming conflicts.
-	 * 
+	 *
 	 * If you try to write() without first calling this method, files can be
 	 * accidentally overwritten!
-	 * 
+	 *
 	 * $dir should be relative to the current script, or if $cfg['server_path'] is set,
 	 * relative to that.
-	 * 
+	 *
 	 * @param string $dir
 	 * @return void
 	 */
@@ -935,13 +935,13 @@ class file {
 		}
 		$this->info['filename'] = $fname;
 	}
-	
+
 	/**
 	 * Ensure filename is unique within given array
-	 * 
+	 *
 	 * This will alter the filename of this object until it no longer matches
 	 * anything in the given array.  This will prevent naming conflicts.
-	 * 
+	 *
 	 * @param array $names
 	 * @return void
 	 */
@@ -957,17 +957,17 @@ class file {
 		}
 		$this->info['filename'] = $fname;
 	}
-	
+
 	/**
 	 * Write file data to disk
-	 * 
+	 *
 	 * When you're ready to save a file upload, use this to write it.
-	 * 
+	 *
 	 * $dir should be relative to the current script, or if $cfg['server_path'] is set,
 	 * relative to that.
-	 * 
+	 *
 	 * You may want to call safe_file() before this, or you could be opening yourself to attack.
-	 * 
+	 *
 	 * @param string $dir
 	 * @return bool
 	 */
@@ -977,7 +977,7 @@ class file {
 		chmod($loc, 0644);
 		return $ret;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -987,18 +987,18 @@ class file {
 		if (substr($dir, -1) == '/') $dir = substr($dir, 0, -1);
 		return $dir;
 	}
-	
+
 	/**
 	 * Is this filename safe for a web-accessible directory?
 	 *
-	 * Anything apache will recognize as executable is unsafe to place in a web 
+	 * Anything apache will recognize as executable is unsafe to place in a web
 	 * accessible directory.  There may be special server conventions that are dangerous
 	 * too, such as a user uploading an .htaccess file
-	 * 
-	 * NOTE: This method should provide pretty good protection by default, but will 
-	 * only recognize the extensions of a few languages.  You should add your own 
+	 *
+	 * NOTE: This method should provide pretty good protection by default, but will
+	 * only recognize the extensions of a few languages.  You should add your own
 	 * extensions to the list by adding them to global $cfg['file_unsafe'];
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function safe_file() {
@@ -1017,30 +1017,30 @@ class file {
  *
  * This is a way of grouping form elements together.  You can
  * use CSS to make it nifty looking.
- * 
+ *
  * @package htmlform
  */
 class fieldset extends container {
 	private $legend;
-	
+
 	function __construct($parent = '', $legend = '', $class = '', $id = '') {
 		if ($legend) $this->setlegend($legend);
 		element::__construct($parent, $id, $class);
 	}
-	
+
 	/**
 	 * Set Legend
-	 * 
+	 *
 	 * Fieldsets have a property called a legend that labels
 	 * a group of form elements.  Use this method to set that label.
-	 * 
+	 *
 	 * @param string $legend
 	 * @return void
 	 */
 	public function setlegend($legend) {
 		$this->legend = trim(strip_tags($legend));
 	}
-			
+
 	/**
 	 * @access private
 	 */
@@ -1057,8 +1057,8 @@ class fieldset extends container {
  * in reality are POST style form submissions.  This helps get around the "state change on GET"
  * design issue in cases where you really want a single-click database update.
  *
- * Using this object instead of a simple link will help protect you against spiders and web 
- * accelerators that explore every link on a page.  You wouldn't want those automatically deleting 
+ * Using this object instead of a simple link will help protect you against spiders and web
+ * accelerators that explore every link on a page.  You wouldn't want those automatically deleting
  * things, adding products to carts, or making any database changes at all.
  *
  * @param container $parent
@@ -1093,13 +1093,13 @@ class textbox extends formelement {
 	private $cleardefault;
 	private $clearvalue;
 	private $search;
-	
+
 	/**
 	 * Construct a text box
 	 *
 	 * Pretty standard constructor for form input of type "text".  Note that this class
 	 * can be toggled into a password box.
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $name
 	 * @param string $value
@@ -1114,7 +1114,7 @@ class textbox extends formelement {
 		if ($password) $this->password(TRUE);
 		formelement::__construct($parent, $name, $class);
 	}
-	
+
 	/**
 	 * Set display value
 	 *
@@ -1130,11 +1130,11 @@ class textbox extends formelement {
 	public function setvalue($value) {
 		$this->value = $value;
 	}
-	
+
 	/**
 	 * Set textbox width
 	 *
-	 * Set width in characters.  This will not limit input.  
+	 * Set width in characters.  This will not limit input.
 	 * Use {@link formelement::check_length()} for that.
 	 *
 	 * @param int $size
@@ -1142,26 +1142,26 @@ class textbox extends formelement {
 	public function setsize($size) {
 		$this->size = intval($size);
 	}
-		
+
 	/**
 	 * Make this a password box
 	 *
 	 * Toggle whether or not this is a password box.  If it is a password
 	 * box, it will show the user **** instead of the letters they type.
-	 * 
+	 *
 	 * @param bool $flag
 	 */
 	public function password($flag = TRUE) {
 		$this->password = $flag ? TRUE : FALSE;
 	}
-	
+
 	/**
 	 * Use javascript to empty textbox when clicked
-	 * 
+	 *
 	 * Only gets rid of the default value, or you can specify a value
 	 * to be cleared.  This will happen 'onfocus', so tabbing to the field
 	 * can also trigger it.
-	 * 
+	 *
 	 * @param string $def_value
 	 * @return void
 	 */
@@ -1169,7 +1169,7 @@ class textbox extends formelement {
 		$this->cleardefault = TRUE;
 		$this->clearvalue = $def_value;
 	}
-	
+
 	/**
 	 * Set up an autocomplete javascript for this textbox
 	 *
@@ -1183,8 +1183,8 @@ class textbox extends formelement {
 	 * $handler is a javascript function responsible for parsing the server's response into
 	 * rows.  Its one parameter will be the responseText or responseJSON from the XMLHttpRequest.<br>
 	 * The handler should be a string that looks something like:
-	 * <pre>"function (response) { 
-	 *   for (row in response) { 
+	 * <pre>"function (response) {
+	 *   for (row in response) {
 	 *     ret.push({value: response[row].newvalue, display: response[row].suggestion});
 	 *   }
 	 *   return ret;
@@ -1198,14 +1198,14 @@ class textbox extends formelement {
 	 *
 	 * $callback is an optional javascript function that takes a row chosen by the user and updates
 	 * the state of the text box.  By default it assumes that the entire entry should appear in the
-	 * textbox (or, if the row is an object, the 'value' property, or if an array, the first element 
+	 * textbox (or, if the row is an object, the 'value' property, or if an array, the first element
 	 * in it).
 	 */
 	public function autocomplete($query, $handler = '', $json = false, $callback = '') {
 		$this->search[] = array('q' => $query, 'h' => $handler, 'json' => $json);
 		if ($callback) $this->search_cback = $callback;
 	}
-	
+
 	public function finalize() {
 		if (empty($this->search)) {
 			parent::finalize();
@@ -1226,7 +1226,7 @@ class textbox extends formelement {
 		}
 		if ($this->search_cback) $doc->addJS("ac.setcallback(".$this->search_cback.");");
 	}
-	
+
 	/**
 	 * Generate Output
 	 * @access private
@@ -1257,7 +1257,7 @@ class textarea extends formelement {
 	private $rows;
 	private $cols;
 	private $contents;
-	
+
 	/**
 	 * Text Area Constructor
 	 *
@@ -1276,7 +1276,7 @@ class textarea extends formelement {
 		if ($height) $this->setheight($height);
 		formelement::__construct($parent, $name, $class);
 	}
-	
+
 	/**
 	 * Set width
 	 *
@@ -1287,7 +1287,7 @@ class textarea extends formelement {
 	public function setwidth($width) {
 		$this->cols = intval($width);
 	}
-	
+
 	/**
 	 * Set height
 	 *
@@ -1298,18 +1298,18 @@ class textarea extends formelement {
 	public function setheight($height) {
 		$this->rows = intval($height);
 	}
-	
+
 	/**
 	 * Set contents
 	 *
 	 * Give the textarea some initial content.
-	 * 
+	 *
 	 * @param string $contents
 	 */
 	public function setcontents($contents) {
 		$this->contents = $contents;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1326,21 +1326,21 @@ class textarea extends formelement {
 
 /**
  * Selection Box Form Element
- * 
+ *
  * This is a drop down selection box.  There are several functions for loading
  * the options.
  * @package htmlform
  */
 class select extends formelement {
-	
+
 	public $container;
 	public $optgrp;
 	private $multiple = 0;
 	private $autobrackets = TRUE;
-	
+
 	/**
 	 * Selection Box Constructor
-	 * 
+	 *
 	 * Nothing special here.
 	 * @param container $parent
 	 * @param string $name
@@ -1350,7 +1350,7 @@ class select extends formelement {
 		formelement::__construct($parent, $name, $class);
 		$this->container = new container;
 	}
-	
+
 	/**
 	 * Add an Option
 	 *
@@ -1371,7 +1371,7 @@ class select extends formelement {
 		else $par = $this->container;
 		new option($par, $value, $label, $selected, $class);
 	}
-	
+
 	/**
 	 * Start an OPTGROUP tag
 	 *
@@ -1386,18 +1386,18 @@ class select extends formelement {
 	public function addOptionGroup($label) {
 		$this->optgrp = new optgroup($this->container, $label);
 	}
-	
+
 	/**
 	 * End an OPTGROUP tag
 	 *
 	 * Use this method to bring an optgroup tag to an end.  This is NOT
-	 * necessary just before addOptionGroup().  This should only be used if you want 
+	 * necessary just before addOptionGroup().  This should only be used if you want
 	 * to add options directly to the select box without being in any optgroup.
 	 */
 	public function endOptionGroup() {
 		unset($this->optgrp);
 	}
-	
+
 	/**
 	 * Deprecated
 	 * @access private
@@ -1405,26 +1405,26 @@ class select extends formelement {
 	public function removeOptionGroup() {
 		unset($this->optgrp);
 	}
-	
+
 	/**
 	 * Add Options from a Database array
-	 * 
+	 *
 	 * This method assumes you are using an array of rows from a database, so
 	 * it accepts two column names - to use as the 'value' and 'label' of each option
 	 * it adds.
-	 * 
+	 *
 	 * If you only provide one column name, it will be used for both the value and the label.
-	 * 
+	 *
 	 * If you don't provide any column names, the 0 element of the array will be used for the value, and
 	 * the 1 element will be used for the label.
-	 * 
+	 *
 	 * If you provide a single-dimensional array, each element will be an option, with the same value
 	 * and label.
-	 * 
+	 *
 	 * <pre>$presidents = get_presidents_from_database();
 	 * $sel = new select($parent, 'myselect');
 	 * $sel->addOptionsData($president, 'presid', 'lastname');</pre>
-	 * 
+	 *
 	 * @param array $data
 	 * @param string $valuekey
 	 * @param string $labelkey
@@ -1440,15 +1440,15 @@ class select extends formelement {
 			else $this->addOption($row, $row); // we got a single dimension array
 		}
 	}
-	
+
 	/**
 	 * Add Options from Data with inherent Hierarchy
-	 * 
+	 *
 	 * Frequently a select box will be used to choose from data that has some
 	 * hierarchical organization to it.  Use this method to do that easily.
-	 * 
+	 *
 	 * It assumes you have data that looks something like in the following usage:
-	 * 
+	 *
 	 * <pre>$mydata = array(
 	 *   array('id'=>1,'name'=>'coders', 'children'=>array(
 	 *     array('id'=>2, 'name'=>'Perl coders'),
@@ -1461,11 +1461,11 @@ class select extends formelement {
 	 *     array('id'=>8, 'name'=>'Desktop designers')
 	 *   ))
 	 * );
-	 * 
+	 *
 	 * $sel->addOptionHierarchy($mydata, 'id', 'name', 'children', '    ');</pre>
-	 * 
+	 *
 	 * With that, your options should come out looking like:
-	 * 
+	 *
 	 * <pre>
 	 * coders
 	 *     Perl coders
@@ -1475,8 +1475,8 @@ class select extends formelement {
 	 *     Print designers
 	 *     iPhone designers
 	 *     Desktop designers
-	 * </pre>   
-	 * 
+	 * </pre>
+	 *
 	 * @param array $data
 	 * @param string $valuekey
 	 * @param string $labelkey
@@ -1487,10 +1487,10 @@ class select extends formelement {
 	public function addOptionHierarchy($data, $valuekey = 0, $labelkey = 1, $childkey = 2, $prefix = '    ') {
 		$this->addOptionHierarchyRecursive($data, $valuekey, $labelkey, $childkey, $prefix);
 	}
-	
+
 	/**
 	 * Recursive helper function for addOptionHierarchy
-	 * 
+	 *
 	 * @param array $data
 	 * @param string $valuekey
 	 * @param string $labelkey
@@ -1507,14 +1507,14 @@ class select extends formelement {
 			$this->addOptionHierarchyRecursive($row[$childkey], $valuekey, $labelkey, $childkey, $prefix, $depth+1);
 		}
 	}
-		
+
 	/**
 	 * Set options as default selections
 	 *
 	 * Use this method to set options as selected by default, based
 	 * on their value.  If you use this method multiple times it will
 	 * overwrite any previously set defaults.  If you desire multiple default
-	 * selections, you may pass it an array; however, the behavior is 
+	 * selections, you may pass it an array; however, the behavior is
 	 * undefined if you set multiple defaults without using {@link multiple()}.
 	 *
 	 * Please note that default selection will be overridden by preload
@@ -1533,7 +1533,7 @@ class select extends formelement {
 			}
 		}
 	}
-	
+
 	public function setDisabled($value = '') {
 		if (empty($value)) return;
 		$values = (array) $value;
@@ -1544,7 +1544,7 @@ class select extends formelement {
 			if ($child instanceof option && $hash[$child->getvalue()]) $child->disabled();
 		}
 	}
-	
+
 	/**
 	 * Turn select box into select multiple
 	 *
@@ -1552,18 +1552,18 @@ class select extends formelement {
 	 * cmd-click for mac users) to select more than one option.  Pass it the
 	 * height of the box you want.  For instance, height of 5 would mean the top
 	 * 5 options are shown in the box without scrolling.
-	 * 
+	 *
 	 * @param int $size
 	 * @return void
 	 */
 	public function multiple($size = 5) {
 		$this->multiple = $size;
 	}
-	
+
 	/**
 	 * Toggle auto-bracket settings
 	 *
-	 * PHP requires that form elements with multiple values be 
+	 * PHP requires that form elements with multiple values be
 	 * named with "[]" at the end.  PHP will interpret this
 	 * automatically as an array.
 	 *
@@ -1573,7 +1573,7 @@ class select extends formelement {
 	public function hidebrackets($flag = TRUE) {
 		$this->autobrackets = !$flag;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1586,15 +1586,15 @@ class select extends formelement {
 			$vals = $_REQUEST[$this->getname()];
 			if (isset($_REQUEST[$this->getname()])) $this->setSelected($vals);
 		}
-		if ($this->multiple > 1) { 
-			if ($this->autobrackets) $this->setname($this->getname() . "[]"); 
-			$multi = ' multiple="multiple" size="'.$this->multiple.'"'; 
+		if ($this->multiple > 1) {
+			if ($this->autobrackets) $this->setname($this->getname() . "[]");
+			$multi = ' multiple="multiple" size="'.$this->multiple.'"';
 		}
-		
+
 		$return = $this->genlabel().$br.substr($pspace, 0, -4).'<select' . $multi . formelement::output() . '>'.$br;
 		$return .= $this->container->output($pspace, $optin);
 		$return .= substr($pspace, 0, -4).'</select>';
-		
+
 		return $return;
 	}
 }
@@ -1623,7 +1623,7 @@ class option extends element {
 	private $label;
 	private $selected;
 	private $disabled;
-	
+
 	function __construct($parent = 0, $value = "", $label = "", $selected = FALSE, $class = '') {
 		if (!$label) $label = $value;
 		$this->setparent($parent);
@@ -1632,31 +1632,31 @@ class option extends element {
 		$this->selected($selected);
 		if ($class) $this->setclass($class);
 	}
-	
+
 	/**
 	 * Retrieve option value
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getvalue() { return $this->value; }
-	
+
 	/**
 	 * Set option value
-	 * 
+	 *
 	 * @param string $value
 	 */
 	public function setvalue($value = '') { $this->value = $value; }
-	
+
 	/**
 	 * Set this option as the selected option
-	 * 
+	 *
 	 * @param bool $selected
 	 * @return void
 	 */
 	public function selected ($selected = TRUE) {
 		$this->selected = $selected ? TRUE : FALSE;
 	}
-	
+
 	/**
 	 * Set this option as disabled
 	 *
@@ -1666,7 +1666,7 @@ class option extends element {
 	public function disabled ($disabled = TRUE) {
 	  $this->disabled = $disabled ? TRUE : FALSE;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1682,15 +1682,15 @@ class option extends element {
  *
  * This element allows a user to upload a file.  Simply creating one of these
  * will make all the necessary changes, such as switching the form's enctype.
- * 
+ *
  * @package htmlform
  */
 class filebrowser extends formelement {
 	private $size;
-	
+
 	/**
 	 * Consctructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $name
 	 * @param int $size
@@ -1703,17 +1703,17 @@ class filebrowser extends formelement {
 		if ($size) $this->setsize($size);
 		if ($class) $this->setclass($class);
 	}
-		
+
 	/**
 	 * Set size in number of characters
-	 * 
+	 *
 	 * @param int $size
 	 * @return void
 	 */
 	public function setsize($size) {
 		$this->size = $size;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1725,7 +1725,7 @@ class filebrowser extends formelement {
 /**
  * Set of Radio Buttons
  *
- * Create a radio button.  The user is allowed to select only one radio 
+ * Create a radio button.  The user is allowed to select only one radio
  * button with any given name, so if you make several of these and give
  * them the same name, only one value will make it to PHP.
  * @package htmlform
@@ -1734,10 +1734,10 @@ class radio extends formelement {
 	private $checked;
 	private $value;
 	private $default;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $name
 	 * @param string $value
@@ -1750,17 +1750,17 @@ class radio extends formelement {
 		$this->checked = $checked;
 		$this->setvalue($value);
 	}
-	
+
 	/**
 	 * Set value to send through when this radio is selected
-	 * 
+	 *
 	 * @param string $value
 	 * @return void
 	 */
 	public function setvalue($value) {
 		$this->value = $value;
 	}
-	
+
 	/**
 	 * Make this the default selected radio button
 	 *
@@ -1769,16 +1769,16 @@ class radio extends formelement {
 	public function setdefault() {
 		$this->default = TRUE;
 	}
-	
+
 	/**
 	 * Get value that will be sent through if this radio is selected
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getvalue() {
 		return $this->value;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1790,7 +1790,7 @@ class radio extends formelement {
 		}
 		parent::finalize();
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1805,8 +1805,8 @@ class radio extends formelement {
 				}
 			}
 		}
-		return '<input type="radio"' . formelement::output() . 
-			($this->checked ? ' checked="checked"' : '') . 
+		return '<input type="radio"' . formelement::output() .
+			($this->checked ? ' checked="checked"' : '') .
 			' value="'.htmlspecialchars($this->value).'">'.$this->genlabel();
 	}
 }
@@ -1814,8 +1814,8 @@ class radio extends formelement {
 /**
  * Checkbox Button
  *
- * Create a checkbox.  The user is allowed to select as many checkboxes as 
- * he likes.  All checkboxes with the same name will be passed to PHP as 
+ * Create a checkbox.  The user is allowed to select as many checkboxes as
+ * he likes.  All checkboxes with the same name will be passed to PHP as
  * an unordered array of values that have been set to TRUE.
  * @package htmlform
  */
@@ -1828,26 +1828,26 @@ class checkbox extends formelement {
 		$this->checked = $checked;
 		if ($value) $this->setvalue($value);
 	}
-	
+
 	/**
 	 * Set the value that is sent through if the checkbox is checked
-	 * 
+	 *
 	 * If unchecked, nothing will be sent in the form data.
-	 * 
+	 *
 	 * @param string $value
 	 * @return void
 	 */
 	public function setvalue($value) {
 		$this->value = $value;
 	}
-	
+
 	/**
 	 * Get the value of the checkbox
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getvalue() { return $this->value; }
-	
+
 	/**
 	 * @access private
 	 */
@@ -1857,12 +1857,12 @@ class checkbox extends formelement {
 		if ($rtrack[$name] instanceof checkbox) {
 			$rtrack[$name]->multiple = TRUE;
 			$this->multiple = TRUE;
-		} else { 
+		} else {
 			$rtrack[$name] = $this;
 		}
 		formelement::finalize();
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1880,48 +1880,48 @@ class checkbox extends formelement {
 			}
 		}
 		if ($this->multiple && !strstr($this->getname(), '[]')) $this->setname($this->getname().'[]');
-		return '<input type="checkbox"' . formelement::output() . 
-			($this->checked ? ' checked="checked"' : '') . 
+		return '<input type="checkbox"' . formelement::output() .
+			($this->checked ? ' checked="checked"' : '') .
 			($this->value ? ' value="'.htmlspecialchars($this->value).'"' : '') . ' />'.$this->genlabel();
 	}
 }
 
 /**
  * Hidden form variables
- * 
+ *
  * This class represents the input tag with type set to "hidden".  Sends
  * a name/value pair through the form without exposing any interface objects to
  * the user.
- * 
+ *
  * @package htmlform
  */
 class hidden extends formelement {
 	private $content;
-	
+
 	function __construct($parent, $name, $value='') {
 		formelement::__construct($parent, $name);
 		if ($value) $this->setvalue($value);
 		else $this->setvalue($_REQUEST[$name]);
 		$this->preload = FALSE;
 	}
-	
+
 	/**
 	 * Set the value of the hidden input
-	 * 
+	 *
 	 * @param string $val
 	 * @return void
 	 */
 	public function setvalue($val) {
 		$this->content = $val;
 	}
-	
+
 	/**
 	 * Get the value of the hidden input
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getvalue() { return $this->content; }
-	
+
 	/**
 	 * @access private
 	 */
@@ -1943,17 +1943,17 @@ class hidden extends formelement {
 
 /**
  * Submit Button
- * 
+ *
  * This class is for the submit button at the end of the form.  Pretty simple.
- * 
+ *
  * @package htmlform
  */
 class submit extends formelement {
 	private $label;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $label
 	 * @param string $class
@@ -1965,13 +1965,13 @@ class submit extends formelement {
 		$this->setdisplay($label);
 		if ($class) $this->setclass($class);
 	}
-	
+
 	/**
 	 * Set Display Text
-	 * 
+	 *
 	 * This will set the text to be used in the button.  In HTML terms, this
 	 * is placed in the 'value' parameter.
-	 * 
+	 *
 	 * @param string $label
 	 * return void
 	 */
@@ -1990,8 +1990,8 @@ class submit extends formelement {
 /**
  * Submit button using image
  *
- * Use this to make a stylized form submission button.  It will 
- * appear like any image, but when clicked will submit the form 
+ * Use this to make a stylized form submission button.  It will
+ * appear like any image, but when clicked will submit the form
  * that encloses it.
  *
  * If you need it to pass a value through, it will automatically use
@@ -2004,10 +2004,10 @@ class submit extends formelement {
 class imgsubmit extends image {
 	private $value;
 	private $disableme;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * Same as the constructor for an image.
 	 * @param container $parent
 	 * @param string $src
@@ -2026,27 +2026,27 @@ class imgsubmit extends image {
 		else $this->setvalue('Submit');
 		if ($class) $this->setclass($class);
 	}
-	
+
 	/**
 	 * Set the value passed through when clicked
-	 * 
+	 *
 	 * This will only appear in the form data if this particular button is
 	 * pressed.  By default, the name in this name/value pair is 'submit'.
-	 * 
+	 *
 	 * @param string $value
 	 * @return void
 	 */
 	public function setvalue($value) {
 		$this->value = $value;
 	}
-	
+
 	/**
 	 * Get the value passed through when clicked
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getvalue() { return $this->value; }
-		
+
 	/**
 	 * @access private
 	 */
@@ -2069,28 +2069,28 @@ class imgsubmit extends image {
 
 /**
  * Label container
- * 
+ *
  * This is used for forms.  You can click it and it will place the focus
  * in the form object that's associated with it.  It's a container, so you can place
  * images and such inside.
- * 
+ *
  * @package htmlform
  */
 class label extends container {
 	protected $for;
-	
+
 	function __construct($parent = 0, $label = '', $for = '', $class = '') {
 		parent::__construct($parent, '', $class);
 		$this->addText($label);
 		$this->isfor($for);
 	}
-	
+
 	/**
 	 * Associate this label with a form element
-	 * 
+	 *
 	 * Places the DOM ID of the associated element in the label's 'for'
 	 * attribute.
-	 * 
+	 *
 	 * @param formelement $ele
 	 * @return void
 	 */
@@ -2098,7 +2098,7 @@ class label extends container {
 		if (!($ele instanceof formelement)) return;
 		$this->for = $ele;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -2112,7 +2112,7 @@ class label extends container {
 			}
 		}
 	}
-	
+
 	/**
 	 * @access private
 	 */

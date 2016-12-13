@@ -1,9 +1,9 @@
 <?php
 /**
  * Project Detail Page
- * 
+ *
  * Shows all the details of a single publish of a project.
- * 
+ *
  * @package phpmanage
  */
 
@@ -83,18 +83,17 @@ if ($p['commentdate'] != '0000-00-00 00:00:00') {
 }
 project_add_data_field($table, 'ID', $p['identify'], $latest['identify']);
 project_add_data_field($table, 'Project', $p['name'], $latest['name']);
-if ($p['master_name'] || $latest['master_name']) project_add_data_field($table, 'Master Project', $p['master_name'], $latest['master_name']);
+if ($p['master_name'] || $latest['master_name']) project_add_data_field($table, 'Portfolio', $p['master_name'], $latest['master_name']);
 project_add_data_field($table, 'Start Date', $p['start'], $latest['start'], true);
 project_add_data_field($table, 'Target Date', $p['target'], $latest['target'], true);
 project_add_data_field($table, 'Last Publish', $latest['created'], $latest['created'], true);
-project_add_data_field($table, 'Type', $p['classification_name'], $latest['classification_name']);
+project_add_data_field($table, 'Project Type', $p['classification_name'], $latest['classification_name']);
+project_add_data_field($table, 'Project Level', $p['unit_name'].' ('.$p['unit_abbr'].')', $latest['unit_name'].' ('.$latest['unit_abbr'].')');
 // did something special on this one: folks who can ONLY see the published version will still see the CURRENT project manager, for clarity
-project_add_data_field($table, 'PM', (checkperm('viewcurrent', $p['id']) || $p['id'] != $latest['id'] ? $p['manager_name'] : $p['current_manager']), $latest['manager_name']);
-project_add_data_field($table, 'Priority', $p['priority'], $latest['priority']);
-project_add_data_field($table, 'Area', $p['unit_name'].' ('.$p['unit_abbr'].')', $latest['unit_name'].' ('.$latest['unit_abbr'].')');
+project_add_data_field($table, 'Project Manager', (checkperm('viewcurrent', $p['id']) || $p['id'] != $latest['id'] ? $p['manager_name'] : $p['current_manager']), $latest['manager_name']);
 project_add_data_field($table, 'Phase', $p['phase'], $latest['phase']);
-project_add_data_field($table, 'Current Activity', $actpre.$p['activity'], $actpre.$latest['activity']);
-project_add_data_field($table, 'Comment', $compre.$p['comment'], $compre.$latest['comment']);
+project_add_data_field($table, 'Health', $p['overall']['status_name'], $latest['overall']['status_name']);
+project_add_data_field($table, 'Status Update', $compre.$p['comment'], $compre.$latest['comment']);
 
 function compare_rowids($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }
 
@@ -201,7 +200,7 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 	$form->setid('publish');
 	new hidden($form, 'id', $p['id']);
 	$hid = new hidden($form, 'pwo_submit', 'Submit');
-	
+
 	$lnk = new link($grp, '#', 'Publish Project');
 	$lnk->addJS('onclick', 'document.forms.publish.submit(); return false;');
 }
@@ -209,7 +208,7 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
 	if (checkperm('owner', $p['id'])) new link($linksgrp, 'links.php', 'edit', array('id'=>$histid));
 	if (checkperm('owner', $p['id'])) new link($attachgrp, 'attach.php', 'edit', array('id'=>$histid));
-	if (checkperm('manageprojects', $p['id'])) 
+	if (checkperm('manageprojects', $p['id']))
 		new link($grp, 'deleteproject.php', 'Delete Project', array('id'=>$histid));
 	if (!checkperm('completeproject', $p['id']) && $p['complete']!='complete')
 		new link ($grp, 'completeproject.php', 'Complete Project', array('id'=>$histid));
@@ -257,7 +256,7 @@ if (!empty($comments)) {
 $div = new div($env, '', 'commentdiv');
 $form = new form($div, 'comment');
 new hidden($form, 'id', $p['id']);
-$fs = new fieldset($form, 'Add a Comment');
+$fs = new fieldset($form, 'Add to the Discussion');
 $fs->addclass('commentfs');
 $tarea = new textarea($fs, 'newcomment', 60, 5);
 $fs->br();

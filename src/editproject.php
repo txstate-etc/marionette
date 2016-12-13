@@ -1,7 +1,7 @@
 <?php
 /**
  * Edit an individual project
- * 
+ *
  * @package phpmanage
  */
 
@@ -53,7 +53,7 @@ if (form::check_error('project')) {
 	} else {
 		$activitydate = $p['activitydate'];
 	}
-	
+
 	function trait_data($trait, $p) {
 		return array(
 			'id'=>$p[$trait]['id'],
@@ -64,7 +64,7 @@ if (form::check_error('project')) {
 			'mitigation'=>$_REQUEST[$trait.'_mitigation']
 		);
 	}
-	
+
 	$data = array(
 		'id'=>$_REQUEST['id'],
 		'name'=> ($_REQUEST['name'] ? $_REQUEST['name'] : $p['name']),
@@ -122,7 +122,7 @@ if (form::check_error('project')) {
 			)+trait_data('overall', $p)
 		) + $data;
 	}
-	
+
 	$id = db_layer::project_update($data, $user->userid());
 	$data = db_layer::project_get(array('id'=>$id));
 	$created = ($id != $p['id']);
@@ -136,7 +136,7 @@ if (form::check_error('project')) {
 		foreach ($userids as $userid)
 			notify_user($userid, $subj, $msg);
 	}
-	if ($created || $p['manager'] != $data['manager']) notify_user($data['manager'], '(Project Assigned) '.$data['name'], 
+	if ($created || $p['manager'] != $data['manager']) notify_user($data['manager'], '(Project Assigned) '.$data['name'],
 		"A project has been assigned to you.\n\nClick below to view project:\n\n".$href
 	);
 	$traits = array('scope','schedule', 'resource', 'quality', 'overall');
@@ -150,35 +150,35 @@ if (form::check_error('project')) {
 		$pms = db_layer::project_progmans($id);
 		foreach ($pms as $pm) notify_user($pm['userid'], '(Project Alert) '.$data['name'], $msg);
 	}
-	
+
 	$doc->refresh(0,'project.php',array('id'=>$id));
 } else {
 
 	$form = new form($env, 'project');
 	$form->prevent_dupes();
 	new hidden($form, 'id', $p['id']);
-	
+
 	// Unique ID
 	if ($p['id']) {
 		$tbox = new textbox($form, 'identify', $p['identify'], 10);
 		$tbox->disabled();
 		$tbox->setlabel("Unique ID:");
-		
+
 		$form->br();
 	}
-	
+
 	// Name
 	$tbox = new textbox($form, 'name', $p['name'], 40);
 	$tbox->setlabel('Project Name:');
 	if ($editing && !checkperm('manageprojects', $p['id'])) $tbox->disabled();
 	else $tbox->check_required();
-	
+
 	$form->br();
-	
+
 	// Master Project
 	$masters = db_layer::masters_getmany();
 	$sel = new select($form, 'master');
-	$sel->setlabel('Master Project:');
+	$sel->setlabel('Portfolio:');
 	if ($editing && !checkperm('manageprojects', $p['id'])) $sel->disabled();
 	$sel->addOption();
 	$sel->addOptionsData($masters, 'id', 'name');
@@ -186,12 +186,12 @@ if (form::check_error('project')) {
 	new contexthelp($form, array('id'=>'masterproject'));
 
 	$form->br();
-	
+
 	// Goal
 	$tarea = new textarea($form, 'goal', 30, 5, $p['goal']);
 	$tarea->setlabel('Project Goal:');
 	if ($editing && !$owner) $tarea->disabled();
-	
+
 	$form->br();
 
 	// Classification
@@ -206,18 +206,6 @@ if (form::check_error('project')) {
 	new contexthelp($form, array('id'=>'classification'));
 
 	$form->br();
-	
-	// Project Manager
-	$managers = db_layer::user_managers();
-	$sel = new select($form, 'manager');
-	$sel->setlabel('Project Manager:');
-	$sel->addOption('', '------');
-	$sel->addOptionsData($managers, 'userid', 'lastfirst');
-	$sel->setSelected($p['manager']);
-	if ($editing && !checkperm('reassign', $p['id'])) $sel->disabled();
-	else $sel->check_required();
-	
-	$form->br();
 
 	// Unit / Department
 	function unit_recur($units, $u, $currentid) {
@@ -230,10 +218,10 @@ if (form::check_error('project')) {
 	  }
 	  return $ret;
 	}
-	
+
 	$u = db_layer::user_get(array('userid'=>doc::getuser()->userid()));
 	$sel = new select($form, 'unit');
-	$sel->setlabel('Unit/Area:');
+	$sel->setlabel('Project Level:');
 	$units = db_layer::units_gethierarchy();
 	$sel->addOption('', '------');
 	$sel->addOptionHierarchy($units, 'id', 'name', 'children', '     ');
@@ -241,7 +229,19 @@ if (form::check_error('project')) {
 	if (!checkperm('sysadmin')) $sel->setDisabled(unit_recur($units, $u, $p['unit']));
 	$sel->check_required();
 	$form->br();
-	
+
+	// Project Manager
+	$managers = db_layer::user_managers();
+	$sel = new select($form, 'manager');
+	$sel->setlabel('Project Manager:');
+	$sel->addOption('', '------');
+	$sel->addOptionsData($managers, 'userid', 'lastfirst');
+	$sel->setSelected($p['manager']);
+	if ($editing && !checkperm('reassign', $p['id'])) $sel->disabled();
+	else $sel->check_required();
+
+	$form->br();
+
 	// Start Date
 	$start = new DateTime($p['start']);
 	$tbox = new textbox($form, 'start', $start->format('m/d/Y'), 20);
@@ -254,9 +254,9 @@ if (form::check_error('project')) {
 	if ($editing && !$owner) $tbox->disabled();
 	else $doc->addJS_afterload("Calendar.setup({inputField : 'startdate', ifFormat : '%m/%d/%Y', button : 'startdatebutton'});");
 	new contexthelp($form, array('id'=>'startdate'));
-	
+
 	$form->br();
-	
+
 	// Target Date
 	$target = new DateTime($p['target']);
 	$tbox = new textbox($form, 'target', $target->format('m/d/Y'), 20);
@@ -271,29 +271,7 @@ if (form::check_error('project')) {
 	new contexthelp($form, array('id'=>'targetdate'));
 
 	$form->br();
-	
-	// Priority
-	if ($p['priority'] >= 'a' && $p['priority'] <= 'z') $p['priority'] = strtoupper($p['priority']);
-	elseif ($p['priority'] > 0 && $p['priority'] <= '26') $p['priority'] = chr(ord('A')+$p['priority']-1);
-	$tbox = new textbox($form, 'priority', $p['priority'], 3);
-	$tbox->setlabel('Priority:');
-	$tbox->check_length(1);
-	$tbox->check_min('A');
-	$tbox->check_max('Z');
-	$tbox->addJS('onkeydown', "if ((!event.shiftKey && event.keyCode > 47 && event.keyCode < 58) || (event.keyCode > 64 && event.keyCode < 91) || (event.keyCode > 95 && event.keyCode < 106)) this.value=''");
-	$tbox->addJS('onkeyup', "
-		var key = this.value.substring(0,1);
-		if (parseInt(key) > 0 && parseInt(key) <= 26) this.value = String.fromCharCode((64+parseInt(key)));
-		else if (key >= 'a' && key <= 'z') this.value = key.toUpperCase();
-		else if (parseInt(key) == 0) this.value = 'A';
-		else if (key != '' && (key < 'A' || key > 'Z')) this.value = '';
-		if (this.value.length > 1) this.value = this.value.substring(0,1);
-	");
-	if ($editing && !checkperm('prioritize', $p['id'])) $tbox->disabled();
-	new contexthelp($form, array('id'=>'priority'));
 
-	$form->br();
-	
 	// Phase
 	$sel = new select($form, 'phaseid');
 	$sel->setlabel('Phase:');
@@ -322,40 +300,31 @@ function phasehide(sel) {
 	new contexthelp($form, array('id'=>'phase'));
 
 	$form->br();
-	
-	//Activity
-	$tbox = new textbox($form, 'activity', $p['activity'], 40);
-	$tbox->setlabel('Activity:');
-	if ($editing && !$owner) $tbox->disabled();
-	
+
+	// Health
+	$sel = new select($form, 'health');
+	$sel->setlabel('Health:');
+	$sel->setid('health');
+	$sel->addOption('', '------');
+	$traits = db_layer::traits_lists();
+	foreach($traits['status'] as $h) {
+		$sel->addOption($h['id'], $h['name']);
+	}
+	$sel->setSelected($p['healthid']);
+	$sel->check_required();
+	if ($editing && !$owner) $sel->disabled();
+	new contexthelp($form, array('id'=>'health'));
+
 	$form->br();
-	
-	//Comment
-	$tarea = new textarea($form, 'comment', 30, 5, $p['comment']);
-	$tarea->setlabel('Comment:');
+
+	//Status Update
+	$tarea = new textarea($form, 'comment', 50, 10, $p['comment']);
+	$tarea->setlabel('Status Update:');
 	if ($editing && !$owner) $tarea->disabled();
-	
+	new contexthelp($form, array('id'=>'comment'));
+
 	$form->br(2);
-	
-	//Traits
-	$table = new table($form, 'traitstable');
-	$trow = new row($table, 'trow');
-	$trow->addCell(' ');
-	$trow->addCell('Flexibility');
-	$trow->addCell('Status');
-	$trow->addCell('Trend');
-	$trow->addCell('Risk');
-	$trow->addCell('Mitigation');
-	$trow->addCell();
-	$disabled = ($editing && !$owner);
-	new traitsform($table, array('prefix'=>'Scope', 'project'=>$p, 'disabled'=>$disabled));
-	new traitsform($table, array('prefix'=>'Schedule', 'project'=>$p, 'disabled'=>$disabled));
-	new traitsform($table, array('prefix'=>'Resource', 'project'=>$p, 'disabled'=>$disabled));
-	new traitsform($table, array('prefix'=>'Quality', 'project'=>$p, 'disabled'=>$disabled));
-	new traitsform($table, array('prefix'=>'Overall', 'project'=>$p, 'disabled'=>$disabled));
-	
-	$form->br();
-	
+
 	//Submit
 	new submit($form, 'Save Project');
 }
