@@ -2,16 +2,12 @@ table.projects td.statusgreen, table.projects td.statusyellow, table.projects td
 	width: 30px;
 }
 
-table.projects tr.trow td.status {
-	font-size: 9px;	
-}
-
 table.projects tr.trow a {
 	color: white;
 }
 
 table.projects td.priority {
-	text-align: center;	
+	text-align: center;
 }
 
 table.projects {
@@ -19,8 +15,8 @@ table.projects {
 	margin: 10px 0px;
 }
 
-table.projects td { 
-	font-size: 12px; 
+table.projects td {
+	font-size: 12px;
 	padding: 3px;
 	border: 1px solid #555;
 }

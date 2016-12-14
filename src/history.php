@@ -1,10 +1,10 @@
 <?php
 /**
  * Output the entire history of a project
- * 
+ *
  * This page generates a table view that gives an overview of
  * every published version of this project.
- * 
+ *
  * @package phpmanage
  */
 
@@ -37,10 +37,9 @@ $pubdate = new DateTime($p['created']);
 $table->loaddata(array(
 	array('ID:', $latest['identify']),
 	array('Project:', $latest['name']),
-	array('Type:', $latest['classification_name']),
-	array('PM:', $latest['manager_name']),
-	array('Priority:', $latest['priority']),
-	array('Area:', $latest['unit_name'].' ('.$latest['unit_abbr'].')'),
+	array('Project Type:', $latest['classification_name']),
+	array('Project Manager:', $latest['manager_name']),
+	array('Project Level:', $latest['unit_name'].' ('.$latest['unit_abbr'].')'),
 	array('Goal:', $latest['goal'])
 ));
 
@@ -52,35 +51,25 @@ $table = new table($env, 'historytable');
 $trow = new row($table, 'trow');
 $trow->addCell('Published', 'date');
 $trow->addCell('Phase', 'phase');
-$trow->addCell('Current Activity', 'activity');
-$trow->addCell('Comment', 'comment');
-$trow->addCell('Area', 'area');
-$trow->addCell('Flexibility', 'flexibility');
-$trow->addCell('Status', 'status');
-$trow->addCell('Trend', 'trend');
-$trow->addCell('Risk', 'risk');
-$trow->addCell('Mitigation', 'risk');
-foreach ($publishes as $pub) {
+$trow->addCell('Health', 'health');
+$trow->addCell('Project Status', 'comment');
+foreach ($publishes as $whichversion => $pub) {
 	$class = ($class == 'odd' ? 'even' : 'odd');
 	$row = new row($table, $class);
-	
+
 	// Date
 	$cell = new cell($row, 'date');
-	$cell->setheight(5);
 	$pubdate = new DateTime($pub['created']);
 	$cell->addText($pubdate->format('m/d/y'));
-	
+
 	// Phase
 	$cell = $row->addCell($pub['phase'], 'phase');
-	$cell->setheight(5);
-	
-	// Activity
-	$cell = $row->addCell($pub['activity'], 'activity');
-	$cell->setheight(5);
-	
+
+	// Health
+	$cell = $row->addCell('', 'status'.strToLower($pub['overall']['status_name']));
+
 	// Comment
 	$cell = $row->addCell($pub['comment'], 'comment');
-	$cell->setheight(5);
 
 	// Attachments (part of comment cell)
 	if (!empty($pub['attach'])) {
@@ -90,21 +79,6 @@ foreach ($publishes as $pub) {
 		foreach ($pub['attach'] as $a) {
 			new link($grp, 'attachment.php', $a['filename'], array('id'=>$a['id']), 'attach');
 		}
-	}
-	
-	$aspects = array('scope', 'schedule', 'resource', 'quality', 'overall');
-	$aspect_names = array('Scope', 'Schedule', 'Resources', 'Quality', 'Overall Health');
-	$innerclass = $class;
-	foreach ($aspects as $i => $aspect) {
-		$t = $pub[$aspect];
-		if ($i>0) $row = new row($table, $innerclass);
-		$innerclass = ($innerclass == 'odd' ? 'even' : 'odd');
-		$row->addCell($aspect_names[$i], 'aspect');
-		$row->addCell($t['flexibility_name'], 'flexibility');
-		$row->addCell('', 'status'.strToLower($t['status_name']));
-		$row->addCell($t['trend_name'], 'trend');
-		$row->addCell($t['risk'], 'risk');
-		$row->addCell($t['mitigation'], 'mitigation');
 	}
 }
 

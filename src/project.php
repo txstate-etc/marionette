@@ -56,8 +56,8 @@ class red_asterisk extends text {
 function project_add_data_field($table, $label, $value, $oldvalue, $isdate = false) {
 	static $class;
 	if ($isdate && strtotime($value)) {
-		$newdate = new DateTime($value);
-		$olddate = new DateTime($oldvalue);
+		$newdate = date_from_database($value);
+		$olddate = date_from_database($oldvalue);
 		$value = $newdate->format('m/d/y');
 		$oldvalue = $olddate->format('m/d/y');
 	}
@@ -90,9 +90,10 @@ project_add_data_field($table, 'Last Publish', $latest['created'], $latest['crea
 project_add_data_field($table, 'Project Type', $p['classification_name'], $latest['classification_name']);
 project_add_data_field($table, 'Project Level', $p['unit_name'].' ('.$p['unit_abbr'].')', $latest['unit_name'].' ('.$latest['unit_abbr'].')');
 // did something special on this one: folks who can ONLY see the published version will still see the CURRENT project manager, for clarity
-project_add_data_field($table, 'Project Manager', (checkperm('viewcurrent', $p['id']) || $p['id'] != $latest['id'] ? $p['manager_name'] : $p['current_manager']), $latest['manager_name']);
+project_add_data_field($table, 'Project Lead', (checkperm('viewcurrent', $p['id']) || $p['id'] != $latest['id'] ? $p['manager_name'] : $p['current_manager']), $latest['manager_name']);
 project_add_data_field($table, 'Phase', $p['phase'], $latest['phase']);
-project_add_data_field($table, 'Health', $p['overall']['status_name'], $latest['overall']['status_name']);
+$status_icon = '[i class="status_'.strToLower($p['overall']['status_name']).'"][/i]';
+project_add_data_field($table, 'Health', $status_icon.$p['overall']['status_name'], $status_icon.$latest['overall']['status_name']);
 project_add_data_field($table, 'Status Update', $compre.$p['comment'], $compre.$latest['comment']);
 
 function compare_rowids($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }
@@ -143,42 +144,6 @@ foreach ((array) $deleted as $att) {
 	new red_asterisk($lnk);
 }
 
-$table = new table($env, 'aspecttable');
-$trow = new row($table, 'trow');
-$cell = $trow->addCell('Program/Project');
-$cell->setwidth(2);
-$trow->addCell('Flexibility');
-$trow->addCell('Status');
-$trow->addCell('Trend');
-$trow->addCell('Risk');
-$trow->addCell('Mitigation');
-
-$aspects = array('scope', 'schedule', 'resource', 'quality', 'overall');
-$aspect_names = array('Scope', 'Schedule', 'Resources', 'Quality', 'Overall Health');
-foreach ($aspects as $i => $aspect) {
-	$t = $p[$aspect];
-	$l = $latest[$aspect];
-	$row = new row($table, $aspect);
-	if ($i == 0) {
-		$cell = new cell($row, 'goal');
-		$cell->addText("Project Goal:", 'goaltitle');
-		if ($p['goal'] != $latest['goal']) new red_asterisk($cell);
-		$cell->addText("\n".$p['goal']);
-		$cell->setheight(5);
-	}
-	$row->addCell($aspect_names[$i], 'aspect');
-	$cell = $row->addCell($t['flexibility_name'], 'flexibility');
-	if ($t['flexibility_name'] != $l['flexibility_name']) new red_asterisk($cell);
-	$cell = $row->addCell('', 'status'.strToLower($t['status_name']));
-	if ($t['status_name'] != $l['status_name']) new red_asterisk($cell);
-	$cell = $row->addCell($t['trend_name'], 'trend');
-	if ($t['trend_name'] != $l['trend_name']) new red_asterisk($cell);
-	$cell = $row->addCell($t['risk'], 'risk');
-	if ($t['risk'] != $l['risk']) new red_asterisk($cell);
-	$cell = $row->addCell($t['mitigation'], 'mitigation');
-	if ($t['mitigation'] != $l['mitigation']) new red_asterisk($cell);
-}
-
 // Project Links (sidebar)
 if ($ispublish) $histid = $p['publishof'];
 else $histid = $p['id'];
@@ -215,6 +180,12 @@ if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'comp
 }
 if (checkperm('completeproject', $histid) && $p['complete']!='complete')
 	new link ($grp, 'completeproject.php', 'Complete Project', array('id'=>$histid));
+
+// Project Goal
+$goal = new div($sidebar, '', 'goal');
+$goal->addText("Project Goal:", 'goaltitle');
+if ($p['goal'] != $latest['goal']) new red_asterisk($goal);
+$goal->addText("\n".$p['goal']);
 
 // Comment Section
 $page = $_REQUEST['page'] ? $_REQUEST['page'] : 1;

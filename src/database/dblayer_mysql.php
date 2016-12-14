@@ -904,10 +904,6 @@ class db_layer {
 			self::$foundrows = $db->get("SELECT FOUND_ROWS()");
 		}
 		foreach ($ret as $k => $row) {
-			$ret[$k]['scope'] = self::traits_get($row['scopetraits']);
-			$ret[$k]['schedule'] = self::traits_get($row['scheduletraits']);
-			$ret[$k]['resource'] = self::traits_get($row['resourcetraits']);
-			$ret[$k]['quality'] = self::traits_get($row['qualitytraits']);
 			$ret[$k]['overall'] = self::traits_get($row['overalltraits']);
 			$ret[$k]['attach'] = self::project_attach($row['id']);
 			$ret[$k]['links'] = self::project_links($row['id']);

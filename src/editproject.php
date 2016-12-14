@@ -233,7 +233,7 @@ if (form::check_error('project')) {
 	// Project Manager
 	$managers = db_layer::user_managers();
 	$sel = new select($form, 'manager');
-	$sel->setlabel('Project Manager:');
+	$sel->setlabel('Project Lead:');
 	$sel->addOption('', '------');
 	$sel->addOptionsData($managers, 'userid', 'lastfirst');
 	$sel->setSelected($p['manager']);
@@ -302,7 +302,7 @@ function phasehide(sel) {
 	$form->br();
 
 	// Health
-	$sel = new select($form, 'health');
+	$sel = new select($form, 'overall_status');
 	$sel->setlabel('Health:');
 	$sel->setid('health');
 	$sel->addOption('', '------');
@@ -310,7 +310,7 @@ function phasehide(sel) {
 	foreach($traits['status'] as $h) {
 		$sel->addOption($h['id'], $h['name']);
 	}
-	$sel->setSelected($p['healthid']);
+	$sel->setSelected($p['overall']['status']);
 	$sel->check_required();
 	if ($editing && !$owner) $sel->disabled();
 	new contexthelp($form, array('id'=>'health'));

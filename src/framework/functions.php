@@ -1,17 +1,17 @@
 <?php
 /**
  * function.php
- * 
+ *
  * A place to store all the random nifty functions I come up with.
- * 
+ *
  * @package functions
  */
 
 /**
  * Add a slash at the end of a path if needed
- * 
+ *
  * Does nothing if the path provided already ends in a slash.
- * 
+ *
  * @param string $dirname
  * @return string
  */
@@ -22,9 +22,9 @@ function endslash($dirname) {
 
 /**
  * Given a path or filename, return file extension
- * 
+ *
  * Central place to store this regex, so it can be improved over time.
- * 
+ *
  * @param string $filename
  * @return string
  */
@@ -36,10 +36,10 @@ function file_extension($filename) {
 
 /**
  * Detect maximum array depth
- * 
+ *
  * Recursive function to go as deep as possible into an
  * array tree and return the maximum depth it finds.
- * 
+ *
  * @param array $array
  * @return int
  */
@@ -54,9 +54,9 @@ function array_depth($array) {
 
 /**
  * Convert a number of seconds into hours:minutes:seconds
- * 
+ *
  * $skip_secs=TRUE will make this return only hours:minutes
- * 
+ *
  * @param int $secs
  * @param bool $skip_secs
  * @return string
@@ -74,7 +74,7 @@ function secs_to_time($secs, $skip_secs = FALSE) {
 
 /**
  * Find the number of seconds between two DateTime objects
- * 
+ *
  * @param DateTime $now
  * @param DateTime $then
  * @return int
@@ -94,7 +94,7 @@ function interval_between($now, $then, $skip_seconds = TRUE) {
 	if ($days) $ret .= $days.'d';
 	if ($hours || $days) $ret .= $hours.'h';
 	$ret .= $mins.'m';
-	if (!$skip_seconds) $ret .= $seconds.'s'; 
+	if (!$skip_seconds) $ret .= $seconds.'s';
 	return $ret;
 }
 
@@ -140,7 +140,7 @@ function parse_interval($interval) {
  * @param DateTime $date
  * @return string
  */
-function relative_date($date, $skip_year = TRUE) {
+function relative_date($date, $skip_year = TRUE, $skip_time = FALSE) {
 	if ($date instanceof timestamp) $date = new DateTime($date->format('YmdHis'));
 	$format = ($skip_year ? 'l, M j - g:ia' : 'l, M j, Y - g:ia');
 	$dateonly = $date->format('l, M j -');
@@ -155,18 +155,18 @@ function relative_date($date, $skip_year = TRUE) {
 	elseif ($days < 7) $rel = $date->format('l');
 	elseif ($days < 14) $rel = 'Next '.$date->format('l');
 	else $rel = $dateonly;
-	return $rel.' '.$timeonly;
+	return $rel.($skip_time ? '' : ' '.$timeonly);
 }
 
 /**
  * Parse a date string with specified format
- * 
+ *
  * PHP doesn't provide this until 5.3.0, so I'm building one.  Returns
  * date in YmdHis format, which is recognized easily by strtotime or
  * an SQL database.
- * 
+ *
  * $format should be specified according to the rules used by PHP's strftime().
- * 
+ *
  * @param string $date
  * @param string $format
  * @return string
@@ -182,15 +182,35 @@ function parse_formatted_date($date, $format) {
 	return $year.$month.$day.$hours.$mins.$secs;
 }
 
+function date_from_database($datestring) {
+	global $cfg;
+
+	// if the database is only returning a date and not a time,
+	// then we should not do time zone math on it
+	$assumed_timezone = $cfg['database_timezone'];
+	if (preg_match('/^\d{4}.?\d{2}.?\d{2}$/', $datestring))
+		$assumed_timezone = new DateTimeZone(date_default_timezone_get());
+
+	$dt = new DateTime($datestring, $assumed_timezone);
+	$dt->setTimeZone(new DateTimeZone(date_default_timezone_get()));
+	return $dt;
+}
+
+function date_to_database($datetime) {
+	global $cfg;
+	$datetime->setTimeZone($cfg['database_timezone']);
+	return $datetime->format('Y-m-d H:i:s');
+}
+
 /**
  * Search through data array and find all keys
- * 
+ *
  * Expects a 2-d data array similar to what might be returned from a database,
  * but with the possibility that some rows have omitted some columns.
- * 
+ *
  * This searches all rows and makes sure to find all the columns that are
  * in use.
- * 
+ *
  * @param array $data
  * @return array
  */
@@ -209,29 +229,29 @@ function get_result_columns($data) {
 
 /**
  * Generate a string of random characters
- * 
+ *
  * There are three possible modes this can operate in,
  * 'alpha', 'numeric', and the default, both.  Should be
  * pretty self-explanatory.
- * 
+ *
  * One thing to note is that this function is guaranteed not
  * to repeat a string in a single page load.  This is important for
  * the framework because we often auto-generate DOM IDs for elements
  * that need them and don't have them.  DOM IDs should always be
  * unique.
- * 
+ *
  * @param int $len
  * @param string $mode
  * @return string
  */
 function generatestring($len = 12, $mode = '') {
 	static $used = array();
-	
+
 	if ($mode == "alpha")
 		$ch = array_merge(range('a','z'), range('A','Z'));
 	elseif ($mode == 'numeric')
 		$ch = range(0,9);
-	else 
+	else
 		$ch = array_merge(range('a','z'), range('A','Z'), range(0,9));
 
 	$max = count($ch) - 1;
@@ -247,16 +267,16 @@ function generatestring($len = 12, $mode = '') {
 
 /**
  * Clean up text before displaying
- * 
+ *
  * Sometimes people will paste HTML source from Word or something into one
  * of your text fields.  You may want to use this function on the data
  * before you send it to the database.  It will decode all HTML encodings such
  * as &amp; and &quot;, and some other things that html_entity_decode() will miss.
- * 
+ *
  * This is NOT used by default in the framework.  You should use it in specific
  * places where you expect plain text from your users and don't want to see any
  * HTML encoded text go in the database.
- * 
+ *
  * @param string $text
  * @return string
  */
@@ -274,13 +294,13 @@ function cleantext($text) {
 
 /**
  * Truncate a string to a given length
- * 
+ *
  * Guarantees a maximum string length.  An ellipsis is added only
  * if truncation occurs and DOES count toward the total.  For example:
- * 
+ *
  * <pre>echo partial_str('This is a very long string.', 12); //output: This is a...
  * echo partial_str('Shorter one.', 12); //output: Shorter one.</pre>
- * 
+ *
  * @param string $str
  * @param int $len
  * @return string
@@ -294,10 +314,10 @@ function partial_str($str, $len) {
 
 /**
  * Substring search
- * 
+ *
  * Checks if $haystack contains $needle. This is the fastest way to
  * accomplish this in PHP, better than using preg_match() or similar.
- * 
+ *
  * @param string $haystack
  * @param string $needle
  * @return bool
@@ -312,7 +332,7 @@ function strcont($haystack, $needle) {
  * Sometimes you want to clue users in to the fact that a number is a ranking, by
  * using "1st" or "2nd" instead of "1" or "2".  Use this function to do the conversion
  * according to the rules commonly observed by English speakers.
- * 
+ *
  * @param int $rank
  * @return string
  */
@@ -330,11 +350,11 @@ function rank_to_placing($rank) {
 
 /**
  * Clean input to ensure array data
- * 
- * This function is designed to clean up the input from a select multiple 
+ *
+ * This function is designed to clean up the input from a select multiple
  * form element when you have a "None" option with empty value.  When users
  * select "None", php will send an array with one element, an empty string.
- * 
+ *
  * This makes it look like the array is !empty which in this case is wrong. This
  * function will convert an array with one emptystring element into an empty array.
  *
@@ -374,9 +394,9 @@ function resize_image($image_resource, $max_width = 160, $max_height = 120, $qua
 	if (!function_exists('imagecreatefromstring')) return false;
 	if (!is_resource($image_resource)) $img = imagecreatefromstring($image_resource);
 	else $img = $image_resource;
-	
+
 	if (!$img) return false;
-	
+
 	// determine the proper dimensions
 	$old_x = imagesx($img);
 	$old_y = imagesy($img);
@@ -387,11 +407,11 @@ function resize_image($image_resource, $max_width = 160, $max_height = 120, $qua
 		$thumb_h = $old_y * ($max_width / $old_x);
 		$thumb_w = $max_width;
 	}
-	
+
 	// create the new image
 	$dest = imagecreatetruecolor($thumb_w,$thumb_h);
 	imagecopyresampled($dest, $img, 0, 0, 0, 0, $thumb_w, $thumb_h, $old_x, $old_y);
-	
+
 	// sharpen the new image
 	$final	= $final * (750.0 / $old_x);
 	$a		= 52;
@@ -407,13 +427,13 @@ function resize_image($image_resource, $max_width = 160, $max_height = 120, $qua
 	$divisor		= $sharpness;
 	$offset			= 0;
 	imageconvolution($dest, $sharpenMatrix, $divisor, $offset);
-	
+
 	// output the image and capture it as a string
 	ob_start();
 	imagejpeg($dest, NULL, $quality);
 	$data = ob_get_contents();
 	ob_end_clean();
-	
+
 	// done
 	imagedestroy($dest);
 	return $data;
@@ -423,13 +443,13 @@ function diff($old, $new) {
 	global $cfg;
 	require_once(endslash($cfg['library_root']).'includes/Diff/Diff.php');
 	require_once(endslash($cfg['library_root']).'includes/Diff/Renderer/pwo.php');
-	
+
 	$lines1 = preg_split('/\r?\n/', $old, -1, PREG_SPLIT_DELIM_CAPTURE);
 	$lines2 = preg_split('/\r?\n/', $new, -1, PREG_SPLIT_DELIM_CAPTURE);
 
 	/* Create the Diff object. */
 	$diff = new Text_Diff('auto', array($lines1, $lines2));
-	
+
 	/* Output the diff in unified format. */
 	$renderer = new Text_Diff_Renderer_pwo();
 	return $renderer->render($diff);

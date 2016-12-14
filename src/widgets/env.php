@@ -4,7 +4,7 @@
  *
  * @package phpmanage
  */
- 
+
 /**
  * Environment Widget
  *
@@ -14,11 +14,11 @@
  */
 class env extends widget {
 	protected function create($parent) {
-		$doc = doc::getdoc();		
+		$doc = doc::getdoc();
 		$doc->includeCSS("!common.css");
 		$doc->setTitle("Marionette");
 		//$doc->addURLIcon("!phpmanage.ico");
-		
+
 		$div = new div($parent, '', 'tabmenu');
 		new env_menu_tab($div, array('target'=>'index.php', 'title'=>'All Projects'));
 		new env_menu_tab($div, array('target'=>'index.php', 'title'=>'My Projects', 'vars'=>array('mine'=>1)));
@@ -31,7 +31,7 @@ class env extends widget {
 		}
 		$span = new span($div, '', 'logout');
 		new link($span, 'login.php', 'Logout', array('action'=>'logout'));
-		
+
 		$div = new div($parent, 'contentdiv');
 
 		return $div;

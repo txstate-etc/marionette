@@ -2,15 +2,23 @@ body, td { font-size: 12px; }
 img { border: none; }
 table { border-collapse: collapse; }
 
-td.statusred {
+i.status_red, i.status_yellow, i.status_green {
+	display: block;
+	float: left;
+	margin-top: -3px;
+	margin-right: 4px;
+	width: 20px;
+	height: 20px;
+}
+td.statusred, i.status_red {
 	background: url(../images/red_small.gif) no-repeat center center;
 }
 
-td.statusyellow {
+td.statusyellow, i.status_yellow {
 	background: url(../images/yellow_small.gif) no-repeat center center;
 }
 
-td.statusgreen {
+td.statusgreen, i.status_green {
 	background: url(../images/green_small.gif) no-repeat center center;
 }
 

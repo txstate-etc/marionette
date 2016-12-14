@@ -1,7 +1,7 @@
 <?php
 /**
  * config.default.php
- * 
+ *
  * This file contains all the configuration information for phpWebObjects
  *
  * You should make a copy of this file, change the settings to fit your site,
@@ -73,6 +73,7 @@ $cfg['caption_size'] = '10px';
 
 /** Time Zone Setting **/
 date_default_timezone_set('America/Chicago');
+$cfg['database_timezone'] = new DateTimeZone('UTC');
 
 if (file_exists($cfg['library_root'].'/config.local.php'))
 	require_once( $cfg['library_root'].'/config.local.php');

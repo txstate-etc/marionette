@@ -4,7 +4,7 @@
  *
  * This page is designed to allow the user to filter and sort their project list
  * however they like.
- * 
+ *
  * @package phpmanage
  */
 
@@ -45,16 +45,15 @@ if (form::check_error('filters')) {
 		'target'=>'date',
 		'start'=>'date',
 		'modified'=>'date',
-		'priority'=>'pri',
 		'manager'=>'list',
 		'name'=>'search',
 		'master'=>'list',
 		'unit'=>'list',
 		'classification'=>'list',
 		'phaseid'=>'list',
-		'activity'=>'search',
+		'comment'=>'search',
 		'goal'=>'search',
-		'anyhealth' => 'list'
+		'overall' => 'list'
 	);
 	foreach ($traits as $tr) $types[$tr] = 'list';
 	for ($i = 1; $i < 1000; $i++) {
@@ -70,32 +69,28 @@ $div = new div($env, 'filtertoggle');
 $lnk = new link($div, '#', 'Edit Custom Filters');
 $form = new form($env, 'filters');
 $form->setid('filterarea');
-$filts = new div($form, 'filtersonly'); 
+$filts = new div($form, 'filtersonly');
 
 // create the template for a filter
 $div = new div($filts, '', 'singlefilter');
 $slct = new select($div, 'field1', 'field');
 $slct->addOption('', '-- Choose Filter --');
 $slct->addOptionGroup('Users');
-$slct->addOption('manager', 'Project Manager', FALSE, 'list');
+$slct->addOption('manager', 'Project Lead', FALSE, 'list');
 $slct->addOptionGroup('Dates');
 $slct->addOption('start', 'Start Date', FALSE, 'date');
 $slct->addOption('target', 'Target Date', FALSE, 'date');
 $slct->addOption('created', 'Created Date', FALSE, 'date');
 $slct->addOption('modified', 'Last Modified', FALSE, 'date');
-$slct->addOptionGroup('Project Health');
-foreach ($traits as $tr)
-	$slct->addOption($tr, ucfirst($tr).' Health', FALSE, 'list');
-$slct->addOption('anyhealth', 'Any Health', FALSE, 'list');
 $slct->addOptionGroup('Other Filters');
-$slct->addOption('master', 'Master Project', FALSE, 'list');
-$slct->addOption('priority', 'Priority', FALSE, 'pri');
+$slct->addOption('master', 'Portfolio', FALSE, 'list');
 $slct->addOption('name', 'Project Title', FALSE, 'search');
 $slct->addOption('phaseid', 'Project Phase', FALSE, 'list');
-$slct->addOption('unit', 'Area', FALSE, 'list');
+$slct->addOption('unit', 'Level', FALSE, 'list');
 $slct->addOption('classification', 'Project Type', FALSE, 'list');
-$slct->addOption('activity', 'Current Activity', FALSE, 'search');
 $slct->addOption('goal', 'Goal', FALSE, 'search');
+$slct->addOption('overall', 'Health', FALSE, 'list');
+$slct->addOption('comment', 'Project Status', FALSE, 'search');
 $slct->setid('field1');
 
 $lnk = new link($form, '#', 'Add another filter');
@@ -137,7 +132,7 @@ if (!empty($jsarr)) {
 // grab filtered list of projects
 $perpage = db_layer::setting('pl_perpage');
 $projects = db_layer::project_getmany((array) $sortopt + array(
-	'latestpublish' => !checkperm('viewcurrent'), 
+	'latestpublish' => !checkperm('viewcurrent'),
 	'manager_show_current'=>$user->userid(),
 	'perpage' => $perpage,
 	'page' => $_REQUEST['pl_page'],

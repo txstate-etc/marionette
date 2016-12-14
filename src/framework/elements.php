@@ -7,14 +7,14 @@
 /**
  * Text Element
  *
- * This element is for all plaintext to appear on the site. The most common 
+ * This element is for all plaintext to appear on the site. The most common
  * way to create a text object is to call {@link container::addText()} on
  * a container. It preserves spacing and line breaks.
  *
  * A small number of HTML tags are allowed and will be passed through intact.
  * However, if left unclosed, they will be automatically closed to enforce
  * XHTML validation.
- * 
+ *
  * <pre>'b' => bold
  * 'i' => italic
  * 's' => strikethrough
@@ -30,18 +30,18 @@
  * <pre>[copy] -> Standard Copyright Symbol
  * [tm]   -> Trademark Symbol
  * [reg]  -> Registered Trademark Symbol</pre>
- * 
+ *
  * @package html
  */
 class text extends element {
 	private $contents;
 	private $strict;
-	  
+
 	/**
 	 * Constructor
 	 *
 	 * $text is the string to be displayed
-	 * 
+	 *
 	 * Specify $class to give it a CSS style.  Text will be placed inside a
 	 * span element.
 	 *
@@ -56,7 +56,7 @@ class text extends element {
 		$this->strict = $strict;
 		return;
 	}
-	
+
 	/**
 	 * Set Text
 	 *
@@ -69,7 +69,7 @@ class text extends element {
 		$this->contents = $text;
 		return;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -96,24 +96,24 @@ class text extends element {
 		}
 		return $return;
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	protected static function approvedtags() {
 		return array('b', 'i', 'h(\d)', 'u', 's', 'strong', 'em', 'ins', 'del');
 	}
-	
+
 	public static function close_dangling_tags($html){
 		foreach (self::approvedtags() as $t) {
 			$expr[] = '('.$t.')';
 		}
 		$alltags = implode('|', $expr);
-		
+
 		#put all opened tags into an array
 		preg_match_all("#<(".$alltags.")>#iU",$html,$result);
 		$openedtags=$result[1];
-		
+
 		#put all closed tags into an array
 		preg_match_all("#</(".$alltags.")>#iU",$html,$result);
 		$closedtags=$result[1];
@@ -122,7 +122,7 @@ class text extends element {
 		if(count($closedtags) == $len_opened){
 			return $html;
 		}
-		
+
 		$openedtags = array_reverse($openedtags);
 		# close tags
 		for($i=0;$i < $len_opened;$i++) {
@@ -134,8 +134,8 @@ class text extends element {
 		}
 		return $html;
 	}
-	
-	
+
+
 	/**
 	 * @access private
 	 */
@@ -146,14 +146,16 @@ class text extends element {
 		}
 		return $text;
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	public static function restoreHTML($text) {
 		$tags = text::approvedtags();
 		foreach ($tags as $tag) {
-			$text = preg_replace('/\[(\/)?(' . $tag . '(\s.*?)?)\]/i', '<$1$2>', $text);
+			$text = preg_replace_callback('/\[(\/)?(' . $tag . '(\s.*?)?)\]/i', function ($matches) {
+				return '<'.$matches[1].htmlspecialchars_decode($matches[2]).'>';
+			}, $text);
 		}
 		return $text;
 	}
@@ -163,7 +165,7 @@ class text extends element {
  * Raw XHTML source
  *
  * This class may be used as a last resort to add unfiltered xhtml to your document.
- * 
+ *
  * Be aware that you are giving up many of the features of PHPWebObjects if you use
  * this function.  This includes things like link rewriting, guaranteed xhtml validation,
  * automatic line breaks, etc.
@@ -175,7 +177,7 @@ class rawxhtml extends element {
 		$this->setXHTML($xhtml);
 	}
 	public function setXHTML($xhtml = '') {
-		$this->xhtml = $xhtml;	
+		$this->xhtml = $xhtml;
 	}
 	public function getXHTML() {
 		return $this->xhtml;
@@ -201,23 +203,23 @@ class link extends container {
 	private $make_secure;
 	private $sel;
 	private $jswindow = array();
-	
+
 	/**
 	 * Constructor
 	 *
 	 * $href is the target of the link, *WITHOUT* CGI variables.  You may prepend
 	 * it with an exclamation point to specify that the file is in the application root,
-	 * as specified in the config file.  e.g. "!mypage.php" might represent 
+	 * as specified in the config file.  e.g. "!mypage.php" might represent
 	 * "/myapp/mypage.php".
 	 *
 	 * $label is the displayed text
 	 *
 	 * $class is the CSS class for the link
-	 * 
-	 * $variables is an associative array containing name=>value pairs, these
-	 * will be converted to a CGI-style URI 
 	 *
-	 * Note that you should not need to worry about session management 
+	 * $variables is an associative array containing name=>value pairs, these
+	 * will be converted to a CGI-style URI
+	 *
+	 * Note that you should not need to worry about session management
 	 * variables in the link.  They'll be handled auto-magically.
 	 *
 	 * @param container $parent
@@ -234,7 +236,7 @@ class link extends container {
 		if ($label) $this->addText($label);
 		return;
 	}
-	
+
 	/**
 	 * Find out if a link is "local" or "external"
 	 *
@@ -255,7 +257,7 @@ class link extends container {
 		}
 		return FALSE;
 	}
-	
+
 	/**
 	 * Find out if a link goes to a new server
 	 *
@@ -263,7 +265,7 @@ class link extends container {
 	 * share session tracking.  We can't be sure that the client has cookies for
 	 * both domains, so we need to put the session information in the link
 	 * just in case.
-	 * 
+	 *
 	 * @param string $link
 	 * @return bool
 	 * @static
@@ -274,7 +276,7 @@ class link extends container {
 		if (strtolower($parsed['host']) == strtolower($_SERVER['HTTP_HOST'])) return FALSE;
 		return TRUE;
 	}
-	
+
 	/**
 	 * Find out if a link points to an executable
 	 *
@@ -283,8 +285,8 @@ class link extends container {
 	 * array of strings.  'php', 'cgi', 'phtml', and 'pl' are built in and will always
 	 * be recognized as code.
 	 *
-	 * Additionally, if you link directly to a directory or domain, it will assume that 
-	 * the index file is code. (May break if you end with a directory that looks like 
+	 * Additionally, if you link directly to a directory or domain, it will assume that
+	 * the index file is code. (May break if you end with a directory that looks like
 	 * it has an extension, e.g. "/myfolder/my.stuff".)
 	 *
 	 * Note that this function is used internally for session management.  URL-based session
@@ -297,11 +299,11 @@ class link extends container {
 	public static function checkcode($link) {
 		global $cfg;
 		if (!is_array($cfg['code_extensions'])) $cfg['code_extensions'] = array();
-		
+
 		// try to detect a directory or domain link
 		if (!preg_match('/\.\w{3,5}$/', $link)) return TRUE;
 		if (preg_match('/http:\/\/[^\/]+\/?$/', $link)) return TRUE;
-		
+
 		// if we have a file with an extension, make sure it's code
 		$builtin = array('php', 'cgi', 'phtml', 'pl');
 		$checklist = array_unique(array_merge($builtin, $cfg['code_extensions']));
@@ -309,7 +311,7 @@ class link extends container {
 			if (preg_match('/\.'.$ext.'$/i', $link)) return TRUE;
 		return FALSE;
 	}
-	
+
 	/**
 	 * Build a URL (static function)
 	 *
@@ -318,7 +320,7 @@ class link extends container {
 	 * implement your site's SEO behavior, via the $doc->setseo() method.
 	 *
 	 * I plan to eventually come up with a SEO-friendly strategy and an AJAX-friendly
-	 * strategy and add a toggle to $cfg so that you can change your site's behavior 
+	 * strategy and add a toggle to $cfg so that you can change your site's behavior
 	 * instantly in your config.php file.
 	 *
 	 * @param string $href
@@ -330,10 +332,10 @@ class link extends container {
 	 */
 	public static function buildquery($href, $variables = array(), $make_secure = 0, $separator = '&amp;', $hash = '', $force_session = 0) {
 		$href = self::expand_href($href);
-		
+
 		// muck with the url if we're supposed to force its secure status
 		if ($make_secure != 0) $href = doc::absolute_url($href, $make_secure);
-		
+
 		// add session variables if appropriate
 		$user = doc::getuser();
 		if ($user instanceof user) {
@@ -341,7 +343,7 @@ class link extends container {
 				if ($force_session > -1) $variables[$user->sidname()] = $user->sid();
 			}
 		}
-		
+
 		//check and see if we have an seo conversion function
 		$doc = doc::getdoc();
 		if (is_callable($doc->getseo())) {
@@ -351,13 +353,13 @@ class link extends container {
 				return $seohref;
 			}
 		}
-		
+
 		$vars = self::build_qstr($variables, $separator);
 		if ($vars) $href .= '?' . $vars;
 		if ($hash) $href .= '#' . $hash;
 		return $href;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -372,7 +374,7 @@ class link extends container {
 			return endslash($cfg['library_path']).substr($href, 1);
 		return $href;
 	}
-	
+
 	/**
 	 * Get an absolute link using the same syntax as link->set_href()
 	 *
@@ -381,7 +383,7 @@ class link extends container {
 	 * links and get access to your base path with the ! modifier.
 	 *
 	 * Example: $emailbody = "See this link:\n\n".link::absolute('!mypage.php', array('id'=>$myid));
-	 * 
+	 *
 	 * Evaluates to: 'http://www.yourdomain.com/yourpath/mypage.php?id=12'
 	 *
 	 * @param string $href
@@ -393,21 +395,21 @@ class link extends container {
 		$href = self::buildquery($href, $vars, 0, '&', $hash, -1);
 		return doc::absolute_url($href);
 	}
-	
+
 	/**
 	 * Convert an array to a query string.
 	 *
-	 * Use this static function to build a query string from an array of 
+	 * Use this static function to build a query string from an array of
 	 * variables.  After using this to build a link, clicking the link will
 	 * make $_GET match the given array, exactly.
 	 *
 	 * $sep is the separator to use, defaults to the separator specified in your
-	 * php.ini file.  Typically you should use '&amp;' for links and '&' for HTTP 
+	 * php.ini file.  Typically you should use '&amp;' for links and '&' for HTTP
 	 * headers like Location.
 	 *
 	 * $prefix is an optional command so that if you provide a non-associative
 	 * array, you can give the numbers a prefix to conform to the standard (CGI variables
-	 * are not allowed to start with a number).  This will make variables that 
+	 * are not allowed to start with a number).  This will make variables that
 	 * (assuming you set $prefix to 'prefix_') look like prefix_0, prefix_1, etc.. .
 	 *
 	 * $key is an input used for recursion; you should avoid using it.
@@ -425,16 +427,16 @@ class link extends container {
 		foreach ((array) $vars as $k => $v) {
 			if (is_int($k) && $prefix) $k = $prefix.$k;
 			elseif ($key) $k = $key.'['.$k.']';
-			
+
 			if (is_array($v)) array_push($ret, self::build_qstr($v,$sep,'',$k));
 			else array_push($ret, urlencode($k).($v != '' || $v == '0' ? "=" : '').urlencode($v));
 		}
-		
+
 		if(!$sep) $sep = ini_get("arg_separator.output");
-		
+
 		return implode($sep, $ret);
 	}
-	
+
 	/**
 	 * Parse an HREF
 	 *
@@ -467,11 +469,11 @@ class link extends container {
 	 *
 	 * Normally you'd set a link's location & variables at creation, but you
 	 * can use this method to set new ones from scratch at some later time.
-	 * 
-	 * You may prepend $href with an exclamation point to specify that the 
-	 * file is in the application root, as specified in the config file.  
+	 *
+	 * You may prepend $href with an exclamation point to specify that the
+	 * file is in the application root, as specified in the config file.
 	 * e.g. "!mypage.php" might represent "/myapp/mypage.php".
-	 * 
+	 *
 	 * @param string $href
 	 * @param array $variables
 	 * @return void
@@ -486,9 +488,9 @@ class link extends container {
 				foreach ($val as $valu) $this->addvar($key, $valu);
 			else $this->addvar($key, $val);
 		}
-		return;	
+		return;
 	}
-	
+
 	public function gethref() {
 		$href = $this->href;
 		if (substr($href, 0, 1) == '!') {
@@ -497,7 +499,7 @@ class link extends container {
 		}
 		return $href;
 	}
-	
+
 	public function sethash($hash = '') {
 		$this->hash = $hash;
 	}
@@ -505,7 +507,7 @@ class link extends container {
 	public function setrel($rel = '') {
 		$this->rel = $rel;
 	}
-	
+
 	/**
 	 * Add an input variable to the link
 	 *
@@ -525,7 +527,7 @@ class link extends container {
 			$ex = $val;
 		}
 	}
-	
+
 	/**
 	 * Set "selected" CSS class
 	 *
@@ -538,14 +540,14 @@ class link extends container {
 	 *
 	 * If you use sel_criteria(), then there will be two classes of links, 'match' and
 	 * 'exact'.  Where a 'match' only has to match the input variables you specified, and an
-	 * 'exact' match still has to match all input variables.  You can set the behavior 
+	 * 'exact' match still has to match all input variables.  You can set the behavior
 	 * for each one individually.
 	 *
 	 * For instance, imagine a menu system where you click a link and when the page reloads
 	 * there is a new submenu underneath.  The parent link should now be plain text (since
 	 * you're already there), and the child links should be visible.
 	 *
-	 * Now click a child link.  The child link becomes text (because you're there), 
+	 * Now click a child link.  The child link becomes text (because you're there),
 	 * but the parent link should be clickable again (to get back to the overview page).  However,
 	 * you still want the parent link to have a different style to denote that it has children showing.
 	 *
@@ -565,7 +567,7 @@ class link extends container {
 	public function sel_class($class) {
 		$this->sel['class'] = $class;
 	}
-	
+
 	/**
 	 * Set CSS class for exact "selected" match
 	 *
@@ -580,7 +582,7 @@ class link extends container {
 	public function sel_exactclass($class) {
 		$this->sel['exactclass'] = $class;
 	}
-	
+
 	/**
 	 * Set rules for link clickability
 	 *
@@ -603,7 +605,7 @@ class link extends container {
 		if ($when == 'match' || $when == 'exact') return TRUE;
 		else return FALSE;
 	}
-	
+
 	/**
 	 * Force link to be "selected" or not
 	 *
@@ -617,13 +619,13 @@ class link extends container {
 		$this->sel['forced'] = TRUE;
 		$this->sel['selected'] = $bool;
 	}
-	
+
 	/**
 	 * Force link to be "exact" or not
 	 *
 	 * Normally links will attempt to automatically figure out that they
-	 * match the current page, and thus are "selected" or "exact".  Use this 
-	 * method to override the automatic detection and set (or unset) the "exact" 
+	 * match the current page, and thus are "selected" or "exact".  Use this
+	 * method to override the automatic detection and set (or unset) the "exact"
 	 * flag.
 	 * @param bool $bool
 	 * @return void
@@ -632,15 +634,15 @@ class link extends container {
 		$this->sel['forcedexact'] = TRUE;
 		$this->sel['exact'] = $bool;
 	}
-	
+
 	/**
-	 * Specify "selected" keys 
+	 * Specify "selected" keys
 	 *
-	 * Use this method to specify the query string inputs to be used to 
+	 * Use this method to specify the query string inputs to be used to
 	 * determine whether the link is "selected"
 	 *
 	 * For instance, if you want the link to be selected based only on two
-	 * keys called 'mode' and 'submode', then pass array('mode', 'submode') 
+	 * keys called 'mode' and 'submode', then pass array('mode', 'submode')
 	 * as the parameter.
 	 *
 	 * If you are only passing one criteria, you do not need to put it inside
@@ -650,7 +652,7 @@ class link extends container {
 		if (!is_array($keys)) $keys = array($keys);
 		$this->sel['criteria'] = $keys;
 	}
-	
+
 	/**
 	 * Determine if href/vars match the current page
 	 *
@@ -669,7 +671,7 @@ class link extends container {
 		$current = doc::absolute_url($_SERVER['PHP_SELF']);
 		$thislink = doc::absolute_url($href);
 		if ($current != $thislink) return FALSE;
-		
+
 		if (!$exact) $totalvars = (array) $criteria;
 		else {
 			$totalvars = array_merge(array_keys($vars), array_keys($_GET), array_keys($_POST));
@@ -677,7 +679,7 @@ class link extends container {
 			if ($user instanceof user) $totalvars = array_diff($totalvars, array($user->sidname()));
 			$totalvars = array_diff($totalvars, array('whichform'));
 		}
-		
+
 		foreach ($totalvars as $key) {
 			if ($_REQUEST[$key] != $vars[$key]) {
 				if (!strcont($key, 'errorcheck') && !strcont($key, 'whichform')) return FALSE;
@@ -685,7 +687,7 @@ class link extends container {
 		}
 		return TRUE;
 	}
-	
+
 	/**
 	 * Set the frame target
 	 *
@@ -719,7 +721,7 @@ class link extends container {
 	public function JSWindow($width = 320, $height = 240, $name = '', $attr = array()) {
 		// set link to open in javascript window
 		$this->jswindow['boolean'] = TRUE;
-		
+
 		// set up the attributes list
 		if (!$attr['width']) $attr['width'] = $width;
 		if (!$attr['height']) $attr['height'] = $height;
@@ -733,11 +735,11 @@ class link extends container {
 		if (!$attr['copyhistory']) $attr['copyhistory'] = 'no';
 		foreach ($attr as $key => $val) $attrs[] = $key.'='.$val;
 		$this->jswindow['attr'] = join(',', $attrs);
-		
+
 		// generate a somewhat predictable name if we weren't given one
 		if (!$name) $name = preg_replace('/\W/', '', basename($this->href));
 		$this->jswindow['name'] = $name;
-		
+
 		return;
 	}
 
@@ -751,7 +753,7 @@ class link extends container {
 	public function make_secure($flag = TRUE) {
 		$this->make_secure = $flag ? 1 : 0;
 	}
-	
+
 	/**
 	 * Force an unsecure link
 	 *
@@ -762,10 +764,10 @@ class link extends container {
 	public function make_unsecure($flag = TRUE) {
 		$this->make_secure = $flag ? -1 : 0;
 	}
-	
+
 	/**
 	 * @access private
-	 */		
+	 */
 	private function locallink() {
 		return link::checklocal($this->href);
 	}
@@ -776,26 +778,26 @@ class link extends container {
 	public function checksecure($href, $user, $make_secure = 0) {
 		if ($make_secure == 1) return TRUE;
 		if ($make_secure == -1) return FALSE;
-		
+
 		if (strtolower(substr($href, 0, 5)) == 'https') $secure = TRUE;
 		if ($user->secure()) $secure = TRUE;
 		return $secure;
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	private function secureurl($user) {
 		return self::checksecure($this->href, $user, $this->make_secure);
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	private function needsession() {
 		return link::checkcode($this->href);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -816,10 +818,10 @@ class link extends container {
 		if ($this->target) $target = ' target="' . htmlspecialchars($this->target) . '"';
 		if ($this->gettitle()) $title = ' title="'.htmlspecialchars($this->gettitle()).'"';
 		if ($this->rel) $rel = ' rel="'.htmlspecialchars($this->rel).'"';
-		
+
 		// are we opening into a javascript window?
 		if ($this->jswindow['boolean']) $this->addJS('onclick', "var ".$this->jswindow['name']." = window.open('".$href."', '".$this->jswindow['name']."', '".$this->jswindow['attr']."'); ".$this->jswindow['name'].'.focus(); '."return false;");
-				
+
 		if ($spanvers) return '<span'.element::output().'>'.container::output($pspace).'</span>';
 		return '<a href="' . $href . '"' . element::output() . $target . $title . $rel . '>' . container::output($pspace) . '</a>';
 	}
@@ -847,11 +849,11 @@ class header extends container {
 		$this->setclass($class);
 		$this->setlevel($level);
 	}
-	
+
 	public function setlevel($level) {
 		$this->level = $level;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -874,10 +876,10 @@ class image extends box {
 	protected $map;
 	protected $mapareas;
 	protected $rollover;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $src
 	 * @param int $width
@@ -894,19 +896,19 @@ class image extends box {
 		$this->setclass($class);
 		return;
 	}
-	
+
 	/**
 	 * Set image source URL
-	 * 
+	 *
 	 * Use this method to set the "src" attribute for the image.  You can
-	 * prepend it with an exclamation point to denote that it's in your 
+	 * prepend it with an exclamation point to denote that it's in your
 	 * standard images directory, as set in the config file.
 	 *
 	 * This works a little like setting a link href. Since you could be calling
 	 * a script to grab your image from a database, you might have variables.
-	 * 
+	 *
 	 * e.g. $img->setsrc('!hello.gif');
-	 * 
+	 *
 	 * @param string $src
 	 * @param array $vars
 	 * @return void
@@ -923,31 +925,31 @@ class image extends box {
 		$this->vars = $vars;
 		return;
 	}
-		
+
 	/**
 	 * Get image source URL
-	 * 
+	 *
 	 * Returns the contents of the image's "src" attribute.  If you
 	 * use an exclamation point for setsrc(), it will already have
 	 * been replaced with the actual path, so this will always return
 	 * exactly what is to be rendered in HTML.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getsrc() {
 		return $this->src;
 	}
-	
+
 	/**
 	 * Set alternate text for your image
-	 * 
+	 *
 	 * This is an HTML attribute that is commonly used to assist in
 	 * browsing for the blind and otherwise disabled.  It should be
 	 * a plain-English description of the image and its purpose.
-	 * 
+	 *
 	 * If you do not specify any alt text the image will print with the alt
 	 * set to the empty string, because the XHTML standard requires an alt tag.
-	 * 
+	 *
 	 * @param string $alt
 	 * @return string
 	 */
@@ -955,21 +957,21 @@ class image extends box {
 		$alt = trim(strip_tags(preg_replace('/\[.*?\]/', '', $alt)));
 		$this->alt = $alt;
 	}
-	
+
 	public function getalt() {
 		return $this->alt;
 	}
-	
+
 	/**
 	 * Add an image rollover
-	 * 
+	 *
 	 * This method will add javascript to make your image roll over
 	 * to something else when the mouse hovers over it.  It also preloads
 	 * the rollover image to prevent delay.
-	 * 
+	 *
 	 * See {@link image::setsrc()} for information about the parameters,
 	 * this works the same way.
-	 * 
+	 *
 	 * @param string $new_src
 	 * @return void
 	 */
@@ -985,17 +987,17 @@ class image extends box {
 		$this->rollover = link::buildquery($this->rollover, $vars);
 		return;
 	}
-	
+
 	/**
 	 * Set a link map for this image
-	 * 
+	 *
 	 * This is an ALTERNATIVE to {@link image::add_map_area()} if, for some
 	 * reason, you have a map created somewhere outside the framework - in an
 	 * included file or something.
-	 * 
+	 *
 	 * If you use {@link image::add_map_area()} at all, this setting will be
 	 * ignored in favor of the framework-generated map.
-	 * 
+	 *
 	 * @param string $mapname
 	 * @return void
 	 */
@@ -1003,22 +1005,22 @@ class image extends box {
 		if (substr($mapname, 0, 1) == '#') $mapname = substr($mapname, 1);
 		$this->map = $mapname;
 	}
-	
+
 	/**
 	 * Add a link to a small portion of the image
-	 * 
+	 *
 	 * This is the framework's way of adding a "map" to an image.  See
 	 * documentation for the HTML "map" tag for information on how it works.
-	 * 
+	 *
 	 * $type should be the type of area you're adding - "rect" or "circle", etc.
 	 * It corresponds to the "shape" attribute of an "area" tag.
-	 * 
+	 *
 	 * $coords should be a string of comma-separated coordinates, exactly what
 	 * should be placed in the "coords" attribute of an "area" tag.
-	 * 
+	 *
 	 * $href and $variables work like all the other links in the framework, will
 	 * maintain session info, etc.
-	 * 
+	 *
 	 * @param string $type
 	 * @param string $coords
 	 * @param string $href
@@ -1031,7 +1033,7 @@ class image extends box {
 		if (!$alt) $alt = basename($href);
 		$this->mapareas[] = array('type'=>$type, 'coords'=>$coords, 'href'=>$href, 'alt'=>$alt);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1054,7 +1056,7 @@ class image extends box {
 		}
 		parent::finalize();
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1068,37 +1070,37 @@ class image extends box {
 		if (count($this->mapareas)) {
 			$this->map = generatestring(4,'alpha');
 			$usemap = '<map name="'.$this->map.'">';
-			foreach ($this->mapareas as $a) 
+			foreach ($this->mapareas as $a)
 				$usemap .= '<area shape="'.htmlspecialchars($a['type']).'" coords="'.htmlspecialchars($a['coords']).'" href="'.htmlspecialchars($a['href']).'" alt="'.htmlspecialchars($a['alt']).'"/>';
 			$usemap .= '</map>';
 		}
 		if ($this->map) $map = ' usemap="#'.htmlspecialchars($this->map).'" ';
-		return '<img src="' . $this->src . '" alt="' . 
+		return '<img src="' . $this->src . '" alt="' .
 			   htmlspecialchars($this->alt) . '"' . $title . $map . box::output().' />'.$usemap;
 	}
 }
 
 /**
  * Media Object
- * 
+ *
  * This class is designed to handle embedded content like flash and streaming
  * video and audio.  It's pretty simple at the moment - it just keys off of
  * the file extension to build the appropriate HTML tags. Recognized tags at the
  * moment include .swf, .mid, .mp3, .mov, .mpg, .mpeg, and .avi.
- * 
+ *
  * You'll have to know the appropriate parameters to control things like looping
  * and autoplay.  Hopefully in the future we can add methods with that kind of
  * knowledge built in.
- * 
+ *
  * @package html
  */
 class mediaobject extends image {
 	protected $params;
 	protected $sources;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $src
 	 * @param int $width
@@ -1112,15 +1114,15 @@ class mediaobject extends image {
 		if ($params['poster']) $this->poster($params['poster']);
 		image::__construct($parent, $src, $width, $height, '', $class);
 	}
-	
+
 	public function addfile($src, $vars = array()) {
 		$this->sources[] = array('src'=>$src, 'vars'=>$vars);
 	}
-	
+
 	public function addparam($key, $val=TRUE) {
 		$this->params[$key] = $val;
 	}
-	
+
 	public function autoplay($flag=TRUE) {
 		if ($flag) $flag = 'autoplay';
 		$this->params['autoplay'] = $flag;
@@ -1139,7 +1141,7 @@ class mediaobject extends image {
 		$this->params['poster'] = link::buildquery($src, $vars);
 		return;
 	}
-	
+
 	public static function mediatype($path) {
 		$ext = file_extension($path);
 		if ($ext == 'mov') $type = 'video/quicktime';
@@ -1151,7 +1153,7 @@ class mediaobject extends image {
 		if ($ext == 'ogm') $type = 'video/ogg';
 		if ($ext == 'mkv') $type = 'video/x-matroska';
 		if ($ext == 'wmv') $type = 'video/x-ms-wmv';
-		
+
 		if ($ext == 'mid' || $ext == 'midi') $type = 'audio/midi';
 		if ($ext == 'ogg') $type = 'audio/ogg';
 		if ($ext == 'wav') $type = 'audio/x-wav';
@@ -1159,7 +1161,7 @@ class mediaobject extends image {
 		if ($ext == 'wma') $type = 'audio/x-ms-wma';
 		return $type;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1167,7 +1169,7 @@ class mediaobject extends image {
 		$path = link::buildquery($this->src, $this->vars);
 		$ext = file_extension($path);
 		$returnopen='';
-		
+
 		if (doc::html5()) {
 			$type = self::mediatype($path);
 			if ($type) {
@@ -1177,14 +1179,14 @@ class mediaobject extends image {
 				if ($this->params['preload'] == 'none' || $this->params['preload'] == 'auto') $attr .= ' preload="'.$this->params['preload'].'"';
 				else $attr .= ' preload="metadata"';
 				if (strcont($type, 'video') && $this->params['poster']) $attr .= ' poster="'.$this->params['poster'].'"';
-				
+
 				if (strcont($type, 'audio')) $tag = 'audio';
 				else $tag = 'video';
-				
+
 				return '<'.$tag.box::output().$attr.'><source src="'.$path.'" type="'.$type.'"/>Your browser does not support the '.$tag.' element.</'.$tag.'>';
 			}
 		}
-				
+
 		if ($ext == "swf") {
 			$returnopen .= '<object'.box::output().' type="application/x-shockwave-flash" data="'.$path.'">'.
 			'<param name="movie" value="'.$path.'" />';
@@ -1219,7 +1221,7 @@ class mediaobject extends image {
 
 /**
  * Horizontal Rule
- * 
+ *
  * This element is a simple horizontal line meant to visually divide two
  * areas of a page.  It creates an HTML "hr" tag.
  *
@@ -1229,10 +1231,10 @@ class divider extends element {
 	private $width;
 	private $size;
 	private $noshade;
-	
+
 	/**
 	 * Divider Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param int $width
 	 * @param string $class
@@ -1241,7 +1243,7 @@ class divider extends element {
 		$this->setwidth($width);
 		element::__construct($parent, "", $class);
 	}
-	
+
 	/**
 	 * Set hr width
 	 *
@@ -1250,7 +1252,7 @@ class divider extends element {
 	public function setwidth($width) {
 		if (intVal($width)) $this->width = $width;
 	}
-	
+
 	/**
 	 * Set hr size attribute
 	 *
@@ -1259,11 +1261,11 @@ class divider extends element {
 	public function setsize($size) {
 		if (intVal($size)) $this->size = $size;
 	}
-	
+
 	public function noshade($flag = TRUE) {
 		$this->noshade = $flag;
 	}
-	
+
 	/**
 	 * Generate Output
 	 *
@@ -1281,7 +1283,7 @@ class divider extends element {
 
 /**
  * Division Container
- * 
+ *
  * This is the standard layout container.  Use it to define a box of content,
  * and use a CSS class definition to define its layout properties.
  * @package html
@@ -1289,10 +1291,10 @@ class divider extends element {
 class div extends container {
 	/**
 	 * Constructor
-	 * 
-	 * Note that the second parameter will set the DOM ID.  A div never gets a 
+	 *
+	 * Note that the second parameter will set the DOM ID.  A div never gets a
 	 * "name" attribute, only "id".
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $id
 	 * @param string $class
@@ -1302,7 +1304,7 @@ class div extends container {
 		element::__construct($parent, "", $class);
 		$this->setid($id);
 	}
-		
+
 	/**
 	 * @access private
 	 */
@@ -1314,7 +1316,7 @@ class div extends container {
 
 /**
  * Paragraph Container
- * 
+ *
  * This is the standard layout container.  Use it to define a box of content,
  * and use a CSS class definition to define its layout properties.
  * @package html
@@ -1322,9 +1324,9 @@ class div extends container {
 class p extends container {
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * Create a new paragraph object.
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $class
 	 * @return p
@@ -1332,7 +1334,7 @@ class p extends container {
 	function __construct($parent = 0, $class = "") {
 		element::__construct($parent, "", $class);
 	}
-		
+
 	/**
 	 * @access private
 	 */
@@ -1344,14 +1346,14 @@ class p extends container {
 
 /**
  * Code Block Container
- * 
+ *
  * This is a container for monospaced content like programming code.
  * @package html
  */
 class codeblock extends container {
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $class
 	 * @return codeblock
@@ -1359,7 +1361,7 @@ class codeblock extends container {
 	function __construct($parent = 0, $class = "") {
 		element::__construct($parent, "", $class);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1371,17 +1373,17 @@ class codeblock extends container {
 
 /**
  * Blockquote container
- * 
+ *
  * Indents whatever's inside
  * @package html
  */
 class blockquote extends container {
 	/**
 	 * Constructor
-	 * 
-	 * Note that $name will be used as the DOM ID.  A blockquote never gets a 
+	 *
+	 * Note that $name will be used as the DOM ID.  A blockquote never gets a
 	 * "name" attribute, only "id".
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $domid
 	 * @param string $class
@@ -1391,7 +1393,7 @@ class blockquote extends container {
 		element::__construct($parent, "", $class);
 		$this->setid($domid);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1402,17 +1404,17 @@ class blockquote extends container {
 
 /**
  * Span container
- * 
+ *
  * Does not break line
  * @package html
  */
 class span extends container {
 	/**
 	 * Constructor
-	 * 
-	 * Note that $name will be used as the DOM ID.  A span never gets a 
+	 *
+	 * Note that $name will be used as the DOM ID.  A span never gets a
 	 * "name" attribute, only "id".
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $domid
 	 * @param string $class
@@ -1422,7 +1424,7 @@ class span extends container {
 		element::__construct($parent, "", $class);
 		$this->setid($domid);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1433,7 +1435,7 @@ class span extends container {
 
 /**
  * HTML Table
- * 
+ *
  * A standard HTML table.  Use CSS to define a style.  Refrain from using
  * tables for layout, use divs instead.
  * @package html
@@ -1441,7 +1443,7 @@ class span extends container {
 class table extends container {
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $class
 	 * @param string $name
@@ -1450,7 +1452,7 @@ class table extends container {
 	function __construct($parent = 0, $class='', $id='') {
 		element::__construct($parent, $id, $class);
 	}
-	
+
 	/**
 	 * Load an array of data into a table
 	 *
@@ -1459,7 +1461,7 @@ class table extends container {
 	 *
 	 * It automatically sets appropriate CSS classes for the table elements to make it easy
 	 * to style your data.  If $titlerow is TRUE, the first row will have the CSS class 'titlerow',
-	 * while all other rows will be classed alternately as 'evenrow' and 'oddrow'.  This allows 
+	 * while all other rows will be classed alternately as 'evenrow' and 'oddrow'.  This allows
 	 * you to use two background colors for your data rows, which makes it much easier to read.
 	 *
 	 * Additionally, all TD elements will be classed based on the number of the column they're in,
@@ -1467,15 +1469,15 @@ class table extends container {
 	 * justified or whatever.  If $lastcol is TRUE, the final column will have the class 'lastcol',
 	 * which is sometimes a more reliable way to write CSS (if you add columns to the data at a
 	 * later date).
-	 * 
+	 *
 	 * Default behavior is to automatically create a title row from the column names returned
-	 * from the database, and class the rightmost column as 'lastcol'.  However there are three 
+	 * from the database, and class the rightmost column as 'lastcol'.  However there are three
 	 * flags to alter behavior:
 	 * <pre>
 	 * $titlerow = TRUE : This toggles whether or not you want loaddata to generate a title
 	 *                    row.  There are two ways it can build it.  If you set $firstrow to
-	 *                    FALSE, then it will use the associative array column names from the 
-	 *                    array itself. 
+	 *                    FALSE, then it will use the associative array column names from the
+	 *                    array itself.
 	 * $firstrow = FALSE : If you set this and $titlerow to TRUE, the first row of the data
 	 *                     you sent will be assumed to be (exactly) the title row.
 	 * $lastcol = TRUE : When set to TRUE the CSS class of the final column's TD elements will
@@ -1494,8 +1496,8 @@ class table extends container {
 
 		if (empty($updatecols)) $updatecols = get_result_columns($array);
 		if (!$this->getclass()) { $this->setclass("datatable"); }
-		
-		if ($array[0][0] || $firstrow) { 
+
+		if ($array[0][0] || $firstrow) {
 			$firstrow = TRUE;
 			foreach ($updatecols as $key) {
 				$titlecols[] = $array[0][$key];
@@ -1515,7 +1517,7 @@ class table extends container {
 			$row->input_array($rowarray, $updatecols, $lastcol);
 		}
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1539,7 +1541,7 @@ class table extends container {
 			}
 		}
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1550,7 +1552,7 @@ class table extends container {
 
 /**
  * HTML Table Row
- * 
+ *
  * This represents one horizontal row of a table.
  * @package html
  */
@@ -1558,18 +1560,18 @@ class row extends container {
 	function __construct($parent = 0, $class = "") {
 		element::__construct($parent, "", $class);
 	}
-	
+
 	/**
 	 * Quickly add data to a row
 	 *
 	 * This method provides an easy way to load database data into a row without
 	 * laboriously creating all the TD elements.
-	 * 
+	 *
 	 * If you don't want to use all the columns in your data, you can send an array
 	 * as the $updatecols parameter, this should be an array of associative array keys
 	 * for the data you DO want to display.
-	 * 
-	 * When $lastcol is set to TRUE the CSS class of the final column's TD element 
+	 *
+	 * When $lastcol is set to TRUE the CSS class of the final column's TD element
 	 * will be 'lastcol'.  When FALSE, it will be classed somthing like 'col4' if
 	 * it's the fourth and final column.
 	 *
@@ -1592,7 +1594,7 @@ class row extends container {
 			else $cell->addText($cellval);
 		}
 	}
-	
+
 	/**
 	 * Add a cell to your row
 	 *
@@ -1611,21 +1613,21 @@ class row extends container {
 		else $cell->addBBCode($contents);
 		return $cell;
 	}
-	
+
 	/**
 	 * Add a cell to the header row that calls for a different sort for the table
-	 * 
+	 *
 	 * Use this method to quickly add cells to your header row that are actually links
 	 * requesting different sort parameters.  Your code will have to pick up on the request
 	 * and pass it on to the database query.
-	 * 
+	 *
 	 * By default the sort parameters will be added as ?sort=columnname&desc=1
-	 * 
+	 *
 	 * If you don't specify a column, $label will be used by default.
-	 * 
+	 *
 	 * If you don't specify whether the column is descending, it is assumed to be ascending
 	 * by default.
-	 * 
+	 *
 	 * @param string $label
 	 * @param string $column
 	 * @param string $class
@@ -1641,14 +1643,14 @@ class row extends container {
 		$lnk = new link($cell, '', $label, array($input_name=>$column, 'desc'=>$mydesc) + doc::create_mimic());
 		return $cell;
 	}
-	
+
 	/**
 	 * Return the number of cells currently in this row
 	 *
 	 * Quickly find the width in number-of-cells of this row.  If some cells are set
 	 * to have a bigger colspan than 1, they'll be counted as more than 1.
 	 *
-	 * NOTE: this will fail if an above row has a TD with a rowspan greater than 1, 
+	 * NOTE: this will fail if an above row has a TD with a rowspan greater than 1,
 	 * needs further work.
 	 *
 	 * @return int
@@ -1659,7 +1661,7 @@ class row extends container {
 		}
 		return $width;
 	}
-	
+
 	public function output($pspace = '', $optin=FALSE) {
 		return "<tr" . element::output() . ">".container::output($pspace, $optin) ."</tr>";
 	}
@@ -1675,10 +1677,10 @@ class cell extends container {
 	private $colspace = 1;
 	private $rowspace = 1;
 	private $header;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param container $parent
 	 * @param string $class
 	 * @param int $width
@@ -1693,17 +1695,17 @@ class cell extends container {
 
 	/**
 	 * Get the column span of the cell
-	 * 
+	 *
 	 * This is the "colspan" attribute, in HTML terms.
 	 * @return int
 	 */
 	public function width() {
 		return ($this->colspace ? $this->colspace : 1);
 	}
-	
+
 	/**
 	 * Set the column span of the cell
-	 * 
+	 *
 	 * Use this method to make the cell eat up X cells to the right of it.
 	 * @param int $width
 	 * @return void
@@ -1714,26 +1716,26 @@ class cell extends container {
 
 	/**
 	 * Get the row height of the cell
-	 * 
+	 *
 	 * This is the "rowspan" attribute, in HTML terms
 	 * @return int
 	 */
 	public function height() {
 		return ($this->rowspace ? $this->rowspace : 1);
 	}
-	
+
 	/**
 	 * Set the row height of the cell
-	 * 
+	 *
 	 * Use this method to make the cell eat up X cells beneath it.
-	 * 
+	 *
 	 * @param int $height
 	 * @return void
 	 */
 	public function setheight($height) {
 		$this->rowspace = $height;
 	}
-	
+
 	/**
 	 * Set this cell as a table header
 	 *
@@ -1746,7 +1748,7 @@ class cell extends container {
 	public function header($flag = TRUE) {
 		$this->header = $flag;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1768,7 +1770,7 @@ class cell extends container {
  *
  * Note that each call to {@link container::addText()} or {@link container::addBBCode()} will
  * create a new list item.  Also, anything you create with this as the parent will first
- * be placed into a new list item.  So be careful not to try to construct long 
+ * be placed into a new list item.  So be careful not to try to construct long
  * items with multiple calls.  Instead, create a {@link listitem} and
  * then fill it with whatever you want.
  *
@@ -1779,16 +1781,16 @@ class htmllist extends container {
 	function __construct($parent, $class='') {
 		element::__construct($parent, '', $class);
 	}
-	
+
 	/**
 	 * Add a List Item
-	 * 
-	 * Use this to add a anything to the list. Essentially it just puts 
-	 * whatever you give it inside a {@link listitem} object, whether 
+	 *
+	 * Use this to add a anything to the list. Essentially it just puts
+	 * whatever you give it inside a {@link listitem} object, whether
 	 * you give it text or a framework object.
-	 * 
+	 *
 	 * Returns the {@link listitem} object so you can manipulate it further.
-	 * 
+	 *
 	 * @param mixed $object
 	 * @param string $class
 	 * @return listitem
@@ -1799,7 +1801,7 @@ class htmllist extends container {
 		elseif (is_string($object)) $li->addText($object);
 		return $li;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1811,7 +1813,7 @@ class htmllist extends container {
 			return $lst->addChild($object);
 		}
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1820,7 +1822,7 @@ class htmllist extends container {
 		$item = new listitem($this);
 		$item->addBBCode($object, $allowobjects);
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1829,7 +1831,7 @@ class htmllist extends container {
 		$item = new listitem($this);
 		$item->addWikiPara($para);
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1838,7 +1840,7 @@ class htmllist extends container {
 		$item = new listitem($this, $class);
 		$item->addText(rtrim($text));
 	}
-	
+
 	/**
 	 * Create ordered list
 	 *
@@ -1851,7 +1853,7 @@ class htmllist extends container {
 	public function ordered($flag = TRUE) {
 		$this->ordered = $flag;
 	}
-	
+
 	/**
 	 * Determine whether this is an ordered list
 	 *
@@ -1860,7 +1862,7 @@ class htmllist extends container {
 	public function isordered() {
 		return $this->ordered;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1884,7 +1886,7 @@ class htmllist extends container {
  *
  * Note that each call to {@link container::addText()} or {@link container::addBBCode()} will
  * create a new list item.  Also, anything you create with this as the parent will first
- * be placed into a new list item.  So be careful not to try to construct long 
+ * be placed into a new list item.  So be careful not to try to construct long
  * items with multiple calls.  Instead, create a {@link listitem} and
  * then fill it with whatever you want.
  *
@@ -1894,16 +1896,16 @@ class deflist extends container {
 	function __construct($parent, $class='') {
 		element::__construct($parent, '', $class);
 	}
-	
+
 	/**
 	 * Add a List Item
-	 * 
-	 * Use this to add a anything to the list. Essentially it just puts 
-	 * whatever you give it inside a {@link listitem} object, whether 
+	 *
+	 * Use this to add a anything to the list. Essentially it just puts
+	 * whatever you give it inside a {@link listitem} object, whether
 	 * you give it text or a framework object.
-	 * 
+	 *
 	 * Returns the {@link listitem} object so you can manipulate it further.
-	 * 
+	 *
 	 * @param mixed $object
 	 * @param string $class
 	 * @return listitem
@@ -1914,7 +1916,7 @@ class deflist extends container {
 		elseif (is_string($object)) $li->addText($object);
 		return $li;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1926,7 +1928,7 @@ class deflist extends container {
 			return $lst->addChild($object);
 		}
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1935,7 +1937,7 @@ class deflist extends container {
 		$item = new listitem($this);
 		$item->addBBCode($object, $allowobjects);
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1944,7 +1946,7 @@ class deflist extends container {
 		$item = new listitem($this);
 		$item->addWikiPara($para);
 	}
-	
+
 	/**
 	 * overload the container method
 	 * @access private
@@ -1953,7 +1955,7 @@ class deflist extends container {
 		$item = new listitem($this, $class);
 		$item->addText(rtrim($text));
 	}
-		
+
 	/**
 	 * @access private
 	 */
@@ -1969,25 +1971,25 @@ class deflist extends container {
 
 /**
  * List Item
- * 
+ *
  * A container representing the "li" tag.
- * 
+ *
  * @package html
  */
 class listitem extends container {
 	protected $defitem;
-	
+
 	function __construct($parent, $class='') {
 		element::__construct($parent, '', $class);
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	public function defitem($type) {
 		$this->defitem = $type;
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -1995,16 +1997,16 @@ class listitem extends container {
 		if ($this->defitem) $ele = $this->defitem;
 		else $ele = 'li';
 		return '<'.$ele.element::output().'>'.container::output($pspace, $optin).'</'.$ele.'>';
-	} 
+	}
 }
 
 /**
  * Anchor
- * 
+ *
  * This is a secondary use of the "a" tag, which I have decided
  * to break out into an individual entity of its own.  Just give it
  * a name.
- * 
+ *
  * @package html
  */
 class anchor extends element {
@@ -2021,10 +2023,10 @@ class anchor extends element {
 
 /**
  * Clear Both element
- * 
+ *
  * This will create a div with its CSS style set to clear: both, it's
  * useful for making sure you don't have issues with float: left
- * 
+ *
  * @package html
  */
 class clear extends element {

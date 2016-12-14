@@ -3,7 +3,7 @@
  * @package timestamp
  * @author Nickolaus Wing
  */
- 
+
 /**
  * Timestamp Class
  *
@@ -21,10 +21,10 @@
  *
  * Then, when you create an instance of timestamp, just specify whether it's coming
  * from user input, or was retrieved from your database.  You can do this in the
- * constructor (new timestamp('user', 'now')), or with the fromdb() and fromuser() 
- * methods. 
+ * constructor (new timestamp('user', 'now')), or with the fromdb() and fromuser()
+ * methods.
  *
- * Similarly, when you need to output it, use todb() when writing to database, 
+ * Similarly, when you need to output it, use todb() when writing to database,
  * and format() when displaying to a user.
  *
  * It will default to UTC for your database, and America/Chicago (US Central Time)
@@ -35,7 +35,7 @@ class timestamp {
 	protected $dt;
 	protected static $userzone;
 	protected static $dbzone;
-	
+
 	/**
 	 * @access private
 	 *
@@ -51,13 +51,13 @@ class timestamp {
 		if ($type == 'user') return self::$userzone;
 		else return self::$dbzone;
 	}
-	
+
 	/**
 	 * Set user's preferred time zone
 	 *
 	 * You'll generally want to call this method once per page load, informing
 	 * of the current user's preference.  If you do not offer users the ability to
-	 * specify a time zone, this will simply default to the zone set by 
+	 * specify a time zone, this will simply default to the zone set by
 	 * date_default_timezone_set() or 'America/Chicago' (US Central Time).
 	 *
 	 * $tzone should be a string recognized by the DateTimeZone constructor. Examples:
@@ -69,14 +69,14 @@ class timestamp {
 		if (!$tzone) return;
 		self::$userzone = new DateTimeZone($tzone);
 	}
-	
+
 	/**
 	 * Set time zone that is assumed for all database entries
 	 *
 	 * Normally this should be UTC, but if you are adding this class to an existing project,
 	 * you may have a great deal of data stored in your local time zone.  Use this method
 	 * to specify which time zone that is.
-	 
+
 	 * $tzone should be a string recognized by the DateTimeZone constructor. Examples:
 	 * 'America/Chicago', 'GMT', 'UTC', 'America/New_York'
 	 *
@@ -85,13 +85,13 @@ class timestamp {
 	public static function setdbzone($tzone) {
 		self::$dbzone = new DateTimeZone($tzone);
 	}
-	
+
 	/**
 	 * Create a new timestamp instance
 	 *
 	 * When constructing a timestamp, you may provide the date string and its
 	 * source.  If the date was pulled from the database, set $source to 'db'. If it comes
-	 * from the user or is created in response to a user's action (like a last-modified date), 
+	 * from the user or is created in response to a user's action (like a last-modified date),
 	 * then set $source to 'user'.
 	 *
 	 * Defaults to 'now' in the user's zone.
@@ -109,14 +109,14 @@ class timestamp {
 		if ($source == 'user') $this->fromuser($stamp);
 		else $this->fromdb($stamp);
 	}
-	
+
 	/**
 	 * @access private
 	 */
 	protected function setstamp($datetime, $tzone) {
 		$this->dt = new DateTime($datetime, $tzone);
 	}
-	
+
 	/**
 	 * @access private
 	 */
@@ -125,7 +125,15 @@ class timestamp {
 		$this->dt->setTimeZone($tzone);
 		return $this->dt->format($format);
 	}
-	
+
+	/**
+	 * Return the current timestamp as a DateTime object
+	 */
+	public function getdatetime() {
+		$this->dt->setTimeZone(self::tzone('user'));
+	  return $this->dt;
+	}
+
 	/**
 	 * Return a formatted date
 	 *
@@ -141,7 +149,7 @@ class timestamp {
 		if (!$format) $format = 'D, M j Y g:ia';
 		return $this->getstamp(self::tzone('user'), $format);
 	}
-	
+
 	/**
 	 * Accept a date-time string from a user
 	 *
@@ -153,7 +161,7 @@ class timestamp {
 	public function fromuser($datetime) {
 		$this->setstamp($datetime, self::tzone('user'));
 	}
-	
+
 	/**
 	 * Return a date-time string suitable for database storage
 	 *
@@ -166,7 +174,7 @@ class timestamp {
 	public function todb($format = '') {
 		return $this->getstamp(self::tzone('db'), $format);
 	}
-	
+
 	/**
 	 * Accept a date-time string from the database
 	 *

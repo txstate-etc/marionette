@@ -1,12 +1,12 @@
 <?php
 /**
  * Master list of Authorized Users
- * 
+ *
  * A lot of code is commented out here because I scaled back the
  * support for groups of users (and therefore group-based permissions).
- * 
+ *
  * Someday that support might re-appear.
- * 
+ *
  * @package phpmanage
  */
 
@@ -31,7 +31,7 @@ $trow = new row($table, 'trow');
 $trow->addCell('NetID', 'netid');
 $trow->addCell('Name', 'fullname');
 $trow->addCell('Area', 'area');
-$trow->addCell('Project Manager', 'manager boolean');
+$trow->addCell('Project Lead', 'manager boolean');
 $trow->addCell('Program Manager', 'progman boolean');
 $trow->addCell('Sysadmin', 'sysadmin boolean');
 $trow->addCell('Create Projects', 'create boolean');
