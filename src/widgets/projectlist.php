@@ -6,6 +6,7 @@ class project_list extends widget {
 		$sortable = $settings['sortable'];
 		$page = $_REQUEST['pl_page'] ? $_REQUEST['pl_page'] : 1;
 		$lastpage = $settings['lastpage'];
+		$now = new DateTime();
 
 		$table = new table($parent, 'projects');
 		$trow = new row($table, 'trow');
@@ -34,7 +35,7 @@ class project_list extends widget {
 			$row = new row($table, $rowclass);
 
 			$target = new DateTime($p['target']);
-			$row->addCell($target->format('m/d/y'), 'date');
+			$row->addCell($target->format('m/d/y').' ('.generic_date_difference($target, $now).')', 'date');
 
 			// some extra work on the link, notifying user of various conditions
 			$cell = $row->addCell($lnk = new link(0, 'project.php', $p['name'], array('id'=>$p['id'])), 'project');

@@ -100,6 +100,7 @@ function interval_between($now, $then, $skip_seconds = TRUE) {
 
 function days_between($now, $then) {
 	$info = parse_interval($now->diff($then, TRUE));
+	return $info->days;
 }
 
 /**
@@ -129,6 +130,18 @@ function parse_interval($interval) {
 		'minutes' => $match[12],
 		'seconds' => $match[14]
 	);
+}
+
+function generic_date_difference($date1, $date2) {
+	$diff = $date2->diff($date1);
+	$days = $diff->days;
+
+	if ($days > 365) $ret = round($days / 365.0, 1).'y';
+	elseif ($days > 31) $ret = round($days / 30.44, 1).'m';
+	else $ret = $days.'d';
+
+	if ($diff->invert) $ret .= ' ago';
+	return $ret;
 }
 
 /**
