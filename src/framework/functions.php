@@ -155,8 +155,7 @@ function generic_date_difference($date1, $date2) {
  */
 function relative_date($date, $skip_year = TRUE, $skip_time = FALSE) {
 	if ($date instanceof timestamp) $date = new DateTime($date->format('YmdHis'));
-	$format = ($skip_year ? 'l, M j - g:ia' : 'l, M j, Y - g:ia');
-	$dateonly = $date->format('l, M j -');
+	$dateonly = $date->format('l, M j');
 	$timeonly = ($date->format('i') == 0 ? $date->format('ga') : $date->format('g:ia'));
 	$today = new DateTime();
 	$days = ($date->format('Y') - $today->format('Y'))*365 + $date->format('z') - $today->format('z');
@@ -168,7 +167,7 @@ function relative_date($date, $skip_year = TRUE, $skip_time = FALSE) {
 	elseif ($days < 7) $rel = $date->format('l');
 	elseif ($days < 14) $rel = 'Next '.$date->format('l');
 	else $rel = $dateonly;
-	return $rel.($skip_time ? '' : ' '.$timeonly);
+	return $rel.($skip_time ? '' : ' - '.$timeonly);
 }
 
 /**
