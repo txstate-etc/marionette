@@ -28,7 +28,7 @@ class project_list extends widget {
 		else $trow->addSortable("Modified", 'modified', 'date');
 		if (!$sortable) $trow->addCell("Health", 'status');
 		else $trow->addSortable("Health", 'overall', 'status');
-		$trow->addCell("Comment", 'comment');
+		$trow->addCell("Status Update", 'comment');
 
 		foreach ($projects as $p) {
 			$rowclass = ($rowclass == 'odd' ? 'even' : 'odd');
