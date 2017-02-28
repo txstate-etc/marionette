@@ -376,6 +376,10 @@ class db_layer {
 			$success = $db->execute("ALTER TABLE permissions ADD createproject TINYINT UNSIGNED NOT NULL AFTER sysadmin");
 			if ($success) self::setting_set('db_version', 17);
 		}
+		if ($success && self::setting('db_version') == 17) {
+			$success = $db->execute("ALTER TABLE permissions ADD addcomment TINYINT UNSIGNED NOT NULL AFTER publish");
+			if ($success) self::setting_set('db_version', 18);
+		}
 		return $success;
 	}
 
@@ -1488,9 +1492,9 @@ class db_layer {
 	 * @param int $parent
 	 * @return array
 	 */
-	public static function units_flattenhierarchy($parent) {
+	public static function units_flattenhierarchy($parent = 0) {
 		$db = self::$db;
-		$list = $db->getcolumn("SELECT id FROM units WHERE parent=?",$parent);
+		$list = $db->getcolumn("SELECT id FROM units WHERE parent=? AND NOT deleted",$parent);
 		$ret = $list;
 		foreach ($list as $i => $id) {
 			$ret = array_merge($ret,self::units_flattenhierarchy($id));
@@ -1574,8 +1578,8 @@ class db_layer {
 		if (!$db->get("SELECT 1 FROM permissions WHERE entityid=? AND entitytype=?", $info['entityid'], $info['entitytype']))
 			$success = $db->execute("INSERT INTO permissions (entityid, entitytype) VALUES (?,?)", $info['entityid'], $info['entitytype']);
 		if ($success) $success = $db->execute("UPDATE permissions SET projectid=?, sysadmin=?, createproject=?, viewpublished=?, viewcurrent=?,
-					  editcurrent=?, publish=? WHERE entityid=? AND entitytype=?", $info['projectid'],
-			$info['sysadmin'], $info['createproject'], $info['viewpub'], $info['viewcurr'], $info['editcurr'], $info['publish'],
+					  editcurrent=?, publish=?, addcomment=? WHERE entityid=? AND entitytype=?", $info['projectid'],
+			$info['sysadmin'], $info['createproject'], $info['viewpub'], $info['viewcurr'], $info['editcurr'], $info['publish'], $info['addcomment'],
 			$info['entityid'], $info['entitytype']);
 		return $success;
 	}
@@ -1713,7 +1717,8 @@ class db_layer {
 	 */
 	public static function user_progman_units($userid) {
 		$db = self::$db;
-		$list = $db->getcolumn("SELECT id FROM units WHERE manager=?",$userid);
+	  $unitids = db_layer::units_flattenhierarchy();
+	  $list = $db->getcolumn("SELECT id FROM units WHERE manager=? AND id IN (?*)", $userid, $unitids);
 		$ret = $list;
 		foreach ($ret as $i => $id) {
 			$ret = array_merge($ret,self::units_flattenhierarchy($id));
@@ -1777,7 +1782,8 @@ class db_layer {
 	 */
 	public static function active_progman($userid) {
 	  $db = self::$db;
-	  return $db->get("SELECT COUNT(*) FROM units WHERE manager=?", $userid);
+	  $unitids = db_layer::units_flattenhierarchy();
+	  return $db->get("SELECT COUNT(*) FROM units WHERE manager=? AND id IN (?*)", $userid, $unitids);
 	}
 
 	/**
@@ -1808,8 +1814,7 @@ class db_layer {
 		$user = self::user_get($filters);
 		if ($user['userid'])
 			$db->execute("UPDATE sessions SET userid=?, caslogin=? WHERE sessid=?", $user['userid'], $filters['caslogin'], $sessid);
-		elseif (self::setting('use_cas'))
-			$db->execute("UPDATE sessions SET caslogin=1 WHERE sessid=?", $sessid);
+		elseif (self::setting('use_cas')) $db->execute("UPDATE sessions SET caslogin=1 WHERE sessid=?", $sessid);
 		return $user['userid'];
 	}
 

@@ -1,15 +1,15 @@
 <?php
 /**
  * Functions
- * 
+ *
  * A file to hold all the random functions I require.
- * 
+ *
  * @package phpmanage
  */
 
 /**
  * Convert DateTime to something appropriate for SQL insertion/update
- * 
+ *
  * @param DateTime $date
  * @return string
  */
@@ -20,12 +20,12 @@ function date_for_sql($date) {
 
 /**
  * Check whether current user has a permission
- * 
+ *
  * This is the standard function for authorizing specific sections of a page.
  * It tests whether the current user has the permission $perm.
- * 
+ *
  * If the user has the 'sysadmin' permission, this always returns TRUE.
- * 
+ *
  * @param string $perm
  * @return bool
  */
@@ -35,28 +35,28 @@ function checkperm($perm, $projectid = 0) {
 	$user = doc::getuser();
 	static $u;
 	if (!is_array($u)) $u = db_layer::user_get(array('userid'=>$user->userid()));
-	
+
 	// System Administrator OR has the permission being queried
 	if ($u['permissions']['sysadmin'] || $u['permissions'][$perm]) return true;
-	
+
 	// Program Managers can create new projects in their area
 	if ($perm == 'createnew' && (db_layer::active_progman($u['userid']) || ($u['permissions']['createproject'] && $u['unitid']))) return true;
-	
+
 	if ($projectid) {
 		// Project Manager Permissions
-		if (in_array($perm, array('publish', 'editcurrent', 'viewcurrent', 'owner', 'prioritize'))) {
+		if (in_array($perm, array('publish', 'editcurrent', 'viewcurrent', 'owner', 'prioritize', 'addcomment'))) {
 			$p = db_layer::project_get(array('id'=>$projectid));
 			if ($p['current_manager_id'] == $u['userid']) return TRUE;
 		}
-		
+
 		// Program Manager Permissions
-		if (in_array($perm, array('editcurrent', 'completeproject', 'reassign', 'prioritize'))) {
+		if (in_array($perm, array('editcurrent', 'completeproject', 'reassign', 'prioritize', 'addcomment'))) {
 			$progmans = db_layer::project_progmans($projectid);
 			foreach ($progmans as $pg) {
 				if ($pg['userid'] == $u['userid']) return TRUE;
 			}
 		}
-		
+
 	}
 	return false;
 }

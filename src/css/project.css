@@ -27,7 +27,7 @@ table.aspecttable td.statusgreen, table.aspecttable td.statusyellow, table.aspec
 	padding: 3px;
 	min-height: 80px;
 	max-height: 120px;
-	overflow: hidden;
+	overflow-y: auto;
 }
 
 .goal .goaltitle {
@@ -114,7 +114,7 @@ form.bottombutton {
 div.sidebar {
 	position: absolute;
 	left: 485px;
-	top: 20px;
+	top: 0px;
 	width: 175px;
 }
 

@@ -1,7 +1,7 @@
-<?php 
+<?php
 /**
  * Set various configuration variables
- * 
+ *
  * @package phpmanage
  */
 
@@ -23,12 +23,13 @@ if (form::check_error('config')) {
 	db_layer::setting_set('default_manager', $_REQUEST['default_manager']);
 	db_layer::setting_set('pl_perpage', $_REQUEST['pl_perpage']);
 	db_layer::setting_set('test_server', $_REQUEST['test_server']);
+	db_layer::setting_set('people_search_url', $_REQUEST['people_search_url']);
 	$env->addText('Settings have been saved.  Taking you back to config page.');
 	$doc->refresh(2, 'config.php');
 } else {
 	$settings = db_layer::setting();
 	$form = new form($env, 'config');
-	
+
 	/** LDAP SETTINGS **/
 	$fs = new fieldset($form, 'LDAP Login Settings');
 	// Server
@@ -44,7 +45,7 @@ if (form::check_error('config')) {
 	$patt = new textbox($fs, 'ldap_userstring', $settings['ldap_userstring'], 55);
 	$patt->setlabel('Userstring Pattern:');
 	$patt->tooltip('Specify the Distinguished Name to check against LDAP, use %netid% to stand in for the individual\'s username.');
-	
+
 	/** CAS SETTINGS **/
 	$fs = new fieldset($form, 'CAS Single Sign-on Settings');
 	// use_cas and force_cas
@@ -67,7 +68,7 @@ if (form::check_error('config')) {
 	$path = new textbox($fs, 'cas_path', substr($settings['cas_path'], 1), 10);
 	$path->setlabel('CAS Path');
 	$path->hidelabel();
-	
+
 	/** OTHER SETTINGS **/
 	$fs = new fieldset($form, 'Other Settings');
 	$slct = new select($fs, 'default_manager');
@@ -84,7 +85,11 @@ if (form::check_error('config')) {
 	// Test Server Checkbox
 	$cbox = new checkbox($fs, 'test_server', 1, db_layer::setting('test_server'));
 	$cbox->setlabel('Test Server:', 'normal');
-	
+	$fs->clear();
+	// People Search server
+	$serv = new textbox($fs, 'people_search_url', $settings['people_search_url'], 40);
+	$serv->setlabel('People Search Service:');
+
 	/** SUBMIT **/
 	$form->br();
 	$sbt = new submit($form, 'Save Settings');

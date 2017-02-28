@@ -34,6 +34,7 @@ if ($haspublishes && $p['complete'] != 'complete') {
 		new link($span, 'project.php', 'here', array('id'=>$latest));
 		$span->addText(' for the latest published version.');
 	} elseif (checkperm('viewcurrent', $p['id'])) {
+		/*
 		$span = new div($env, 'oldpublish');
 		if ($latest['id'] == $p['id']) {
 			$span->addText('You are viewing the published version of this project.  Click ');
@@ -44,6 +45,7 @@ if ($haspublishes && $p['complete'] != 'complete') {
 			new link($span, 'project.php', 'here', array('id'=>$latest['id']));
 			$span->addText(' for the published version.');
 		}
+		*/
 	}
 }
 
@@ -156,6 +158,7 @@ if (checkperm('editcurrent', $p['id']) && (!$ispublish || $p['id'] == $latest['i
 // add a form submission for publishing the project
 // should not be a link as that would be a violation of the rule
 // against state change on GET
+/*
 if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'complete') {
 	if (form::check_error('publish', 10)) {
 		db_layer::project_publish($p['id'], $user->userid());
@@ -169,6 +172,7 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 	$lnk = new link($grp, '#', 'Publish Project');
 	$lnk->addJS('onclick', 'document.forms.publish.submit(); return false;');
 }
+*/
 
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
 	if (checkperm('owner', $p['id'])) new link($linksgrp, 'links.php', 'edit', array('id'=>$histid));
@@ -224,15 +228,17 @@ if (!empty($comments)) {
 	}
 }
 
-$div = new div($env, '', 'commentdiv');
-$form = new form($div, 'comment');
-new hidden($form, 'id', $p['id']);
-$fs = new fieldset($form, 'Add to the Discussion');
-$fs->addclass('commentfs');
-$tarea = new textarea($fs, 'newcomment', 60, 5);
-$fs->br();
-$subt = new submit($fs, 'Preview');
-$subt = new submit($fs);
+if (checkperm('addcomment')) {
+	$div = new div($env, '', 'commentdiv');
+	$form = new form($div, 'comment');
+	new hidden($form, 'id', $p['id']);
+	$fs = new fieldset($form, 'Add to the Discussion');
+	$fs->addclass('commentfs');
+	$tarea = new textarea($fs, 'newcomment', 60, 5);
+	$fs->br();
+	$subt = new submit($fs, 'Preview');
+	$subt = new submit($fs);
+}
 
 $doc->output();
 ?>

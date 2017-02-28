@@ -150,7 +150,7 @@ if (form::check_error('project')) {
 		$pms = db_layer::project_progmans($id);
 		foreach ($pms as $pm) notify_user($pm['userid'], '(Project Alert) '.$data['name'], $msg);
 	}
-
+	db_layer::project_publish($id, $user->userid());
 	$doc->refresh(0,'project.php',array('id'=>$id));
 } else {
 

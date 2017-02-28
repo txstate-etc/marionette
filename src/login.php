@@ -1,11 +1,11 @@
 <?php
 /**
  * Login form
- * 
+ *
  * Pretty simple, this form handles logins.  If CAS is turned on then
  * it'll redirect the browser to the CAS login page.  Otherwise it generates
  * one.
- * 
+ *
  * @package phpmanage
  */
 
@@ -59,6 +59,23 @@ if (!$_REQUEST['whichform'] && db_layer::setting('use_cas')) {
 	else $success = phpCAS::checkAuthentication();
 	if ($success) {
 		$netid = phpCAS::getUser();
+
+		// optionally use peoplesearch to autoprovision users
+		$u = db_layer::user_get(array('username'=>$netid));
+		if (!$u['userid']) {
+			$peopleurl = db_layer::setting('people_search_url');
+			if ($peopleurl && $netid) {
+				$userinfo = array('username'=>$netid);
+				$people = json_decode(file_get_contents($peopleurl.'?q=userid%20is%20'.$netid));
+				$result = $people->{'results'}[0];
+				if (in_array(strtolower($result->{'category'}), array('staff', 'faculty'))) {
+					$userinfo['firstname'] = $result->{'firstname'};
+					$userinfo['lastname'] = $result->{'lastname'};
+					db_layer::user_update($userinfo);
+				}
+			}
+		}
+
 		if (db_layer::usertosession(array('sessid'=>$user->sessid(), 'username'=>$netid, 'caslogin'=>1))) {
 			$redir = $user->grab('redirect_after_login');
 			if ($redir) {
@@ -88,9 +105,9 @@ $doc->includeCSS('!common.css');
 $doc->includeCSS('!login.css');
 
 function logincheck ($login) {
-	if (!db_layer::user_checklogin($login, $_REQUEST['passwd'])) 
+	if (!db_layer::user_checklogin($login, $_REQUEST['passwd']))
 		return ' not found or password does not match.';
-	$info = db_layer::user_get(array('username'=>$login)); 
+	$info = db_layer::user_get(array('username'=>$login));
 	if (!$info['userid'])
 		return ' password OK, but not yet added as a user of this software.';
 	return '';
@@ -102,20 +119,20 @@ if (form::check_error('login')) {
 } else {
 	$div = new div($doc, '', 'logincontainer');
 	$form = new form($div, 'login');
-	
+
 	// Net ID
 	$tbox = new textbox($form, 'netid', '', 20);
 	$tbox->setlabel('NetID:');
 	$tbox->check_required();
 	$tbox->check_callback('logincheck');
 	$form->br();
-	
+
 	// Password
 	$tbox = new textbox($form, 'passwd', '', 20);
 	$tbox->setlabel('Password:');
 	$tbox->password();
 	$form->br(2);
-	
+
 	// Submit
 	$sbt = new submit($form, 'Login');
 	$sbt->setlabel(' ');
