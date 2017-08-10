@@ -812,6 +812,14 @@ class db_layer {
 				$extrabind += $filtbind;
 			}
 		}
+		else if ($filters['filter_rules']) {
+			list($filtquery, $filtbind) = self::filter_query_from_rules($filters['filter_rules']);
+			if ($filtquery) 
+			{
+				$filtjoin = 'INNER JOIN ( '.$filtquery.' ) f ON f.id=p.id';
+				$extrabind += $filtbind;
+			}
+		}
 
 		if ($filters['publishof']) { $extra .= ' AND p.publishof=?'; $extrabind[] = $filters['publishof']; }
 		if ($filters['manager']) { $extra .= ' AND p.manager=?'; $extrabind[] = $filters['manager']; }
@@ -1987,6 +1995,12 @@ class db_layer {
 
 		// let's create a list for each field that's included, later we can AND them together
 		$rules = $db->getall("SELECT * FROM filters_data WHERE filterid=? ORDER BY field", $filtid);
+
+		return self::filter_query_from_rules($rules);
+
+	}
+
+	public static function filter_query_from_rules($rules) {
 		foreach ($rules as $r) $mast[$r['field']][] = $r;
 
 		if (empty($rules)) return array(0,0);
