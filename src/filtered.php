@@ -8,6 +8,7 @@
  * @package phpmanage
  */
 
+
 require_once("common.php");
 require_once("widgets/projectlist.php");
 
@@ -25,6 +26,16 @@ $doc->includeJS('!jscal/calendar.js');
 $doc->includeJS('!jscal/calendar-en.js');
 $doc->includeJS('!jscal/calendar-setup.js');
 $doc->includeJS('!dateformat.js');
+
+function construct_query_parms($rules) {
+	$parmString = '';
+	foreach ($rules as $r) {
+		$parmString .= sprintf('%s|%s|%s', $r["field"], $r['control'], $r['val']);
+		$parmString .= '&';
+	}
+
+	return trim($parmString, '&');
+}
 
 function add_list_data($data, $field, $valuecol, $labelcol) {
 	$js .= "phpmanage_list_data['".$field."'] = [\n";
@@ -98,7 +109,6 @@ $lnk->setid('addfilterbutton');
 
 $sbt = new submit($form, 'Apply Filters');
 
-
 // javascript will need the proper path to the calendar icon
 global $cfg;
 $doc->addJS("phpmanage_cal_path = '".endslash($cfg['image_root'])."calendar.gif';");
@@ -121,7 +131,86 @@ add_list_data(db_layer::type_getmany(), 'classification', 'id', 'name');
 add_list_data(db_layer::units_getmany(), 'unit', 'id', 'name');
 
 
-$filtdata = db_layer::filter_currentdata($user->userid());
+// try to set $filtdata by parsing the URL query string
+$filtdata = null;
+$url = $_SERVER['REQUEST_URI'];
+$urlParams = parse_url($url, PHP_URL_QUERY);
+
+$use_query_parms = False;
+if (!is_null($urlParams))
+{
+	$filtdata = array();
+
+	$urlParams = urldecode($urlParams);
+
+	$filterArray = explode('&', $urlParams);
+	foreach ($filterArray as $filter)
+	{
+		$filterComponents = explode('|', $filter);
+		if (count($filterComponents) != 3)
+		{
+			$filtdata = null;
+			break;
+		}
+
+		$filter_field = $filterComponents[0];
+		$filter_control = $filterComponents[1];
+		$filter_val = $filterComponents[2];
+		
+
+		
+		$filter_type = 'DEFAULT';
+		switch(strtoupper($filter_control))
+		{
+			case 'EQUAL':
+			case 'NOTEQUAL':
+				$filter_type = 'list';
+				break;
+
+			case 'GT':
+			case 'LT':
+				$filter_type = 'date';
+				break;
+
+			case 'MAYCONT':
+			case 'MUSTCONT':
+			case 'NOTCONT':
+				$filter_type = 'search';
+				break;
+		}
+		
+
+		$filtdata[] = array('type' => $filter_type, 
+			'field' => $filter_field, 
+			'control' => $filter_control, 
+			'val' => $filter_val);
+	}
+	$use_query_parms = True;
+}
+
+if (is_null($filtdata))
+{
+	$filtdata = db_layer::filter_currentdata($user->userid());
+	$use_query_parms = False;
+
+	//If the user came to this page via a submit (aka - clicking the Apply Filters button)
+	//Then redirect to the parameterized URL...
+
+	if(!is_null($_POST["pwo_submit"]))
+	{
+		$URL = 'filtered.php';
+		$qparms = construct_query_parms($filtdata);
+		if (strlen($qparms) != 0)
+		{
+			$URL = $URL . '?' . $qparms;
+		}
+
+		$doc->addJS("document.location.href='{$URL}");
+		echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
+	}
+}
+
+//...Otherwise, continue loading the filtered.php page as normal using the user's DB filters
 foreach ($filtdata as $f) {
 	$jsarr[] = "{field: '".addslashes($f['field'])."', control: '".addslashes($f['control'])."', val: '".addslashes($f['val'])."'}";
 }
@@ -131,17 +220,29 @@ if (!empty($jsarr)) {
 
 // grab filtered list of projects
 $perpage = db_layer::setting('pl_perpage');
-$projects = db_layer::project_getmany((array) $sortopt + array(
-	'latestpublish' => !checkperm('viewcurrent'),
-	'manager_show_current'=>$user->userid(),
-	'perpage' => $perpage,
-	'page' => $_REQUEST['pl_page'],
-	'filterid'=>db_layer::filter_current($user->userid())
-));
+
+$project_parms = (array) $sortopt + array(
+'latestpublish' => !checkperm('viewcurrent'),
+'manager_show_current'=>$user->userid(),
+'perpage' => $perpage,
+'page' => $_REQUEST['pl_page']);
+
+if ($use_query_parms)
+{
+	$project_parms['filter_rules'] = $filtdata;
+}
+else
+{
+	$project_parms['filterid'] = db_layer::filter_current($user->userid());
+}
+
+$projects = db_layer::project_getmany($project_parms);
+
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
 
 new project_list($env, array('data'=>$projects, 'sortable'=>false, 'lastpage'=>$lastpage));
 
 $doc->output();
+
 ?>
