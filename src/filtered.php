@@ -236,9 +236,6 @@ else
 	$project_parms['filterid'] = db_layer::filter_current($user->userid());
 }
 
-$_SESSION['filterQuery'] = construct_query_parms($filtdata);
-
-
 $projects = db_layer::project_getmany($project_parms);
 
 $foundrows = db_layer::$foundrows;
