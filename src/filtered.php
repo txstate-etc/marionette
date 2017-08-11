@@ -157,6 +157,8 @@ if (!is_null($urlParams))
 		$filter_control = $filterComponents[1];
 		$filter_val = $filterComponents[2];
 		
+
+		
 		$filter_type = 'DEFAULT';
 		switch(strtoupper($filter_control))
 		{
@@ -176,6 +178,7 @@ if (!is_null($urlParams))
 				$filter_type = 'search';
 				break;
 		}
+		
 
 		$filtdata[] = array('type' => $filter_type, 
 			'field' => $filter_field, 
@@ -201,7 +204,8 @@ if (is_null($filtdata))
 		{
 			$URL = $URL . '?' . $qparms;
 		}
-		echo "<script type='text/javascript'>document.location.href='{$URL}';</script>";
+
+		$doc->addJS("document.location.href='{$URL}");
 		echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
 	}
 }
