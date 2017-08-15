@@ -5,7 +5,7 @@ body, td {
 img { border: none; }
 table { border-collapse: collapse; }
 
-i.status_red, i.status_yellow, i.status_green {
+i.status_red, i.status_yellow, i.status_green, i.status_blue {
 	display: block;
 	float: left;
 	margin-top: -3px;
@@ -23,6 +23,10 @@ td.statusyellow, i.status_yellow {
 
 td.statusgreen, i.status_green {
 	background: url(../images/green_small.gif) no-repeat center center;
+}
+
+td.statusblue, i.status_blue {
+	background: url(../images/blue_small.gif) no-repeat center center;
 }
 
 label {

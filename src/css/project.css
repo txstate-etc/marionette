@@ -16,7 +16,7 @@ table.aspecttable tr.trow td {
 	font-weight: bold;
 }
 
-table.aspecttable td.statusgreen, table.aspecttable td.statusyellow, table.aspecttable td.statusred {
+table.aspecttable td.statusgreen, table.aspecttable td.statusyellow, table.aspecttable td.statusred, table.aspecttable td.statusblue {
 	width: 35px;
 	text-align: right;
 }
@@ -69,7 +69,7 @@ table.historytable tr.trow td {
 	font-weight: bold;
 }
 
-table.historytable td.statusgreen, table.publishtable td.statusyellow, table.publishtable td.statusred {
+table.historytable td.statusgreen, table.publishtable td.statusyellow, table.publishtable td.statusred, table.publishtable td.statusblue {
 	width: 30px;
 }
 

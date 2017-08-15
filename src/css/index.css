@@ -1,4 +1,4 @@
-table.projects td.statusgreen, table.projects td.statusyellow, table.projects td.statusred {
+table.projects td.statusgreen, table.projects td.statusyellow, table.projects td.statusred, table.projects td.statusblue {
 	width: 30px;
 }
 
