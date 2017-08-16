@@ -742,6 +742,37 @@ class db_layer {
 		return $success;
 	}
 
+/**
+	 * Add a link to a project, or update existing one if it exists
+	 * This function primarily used for Static Link Fields
+	 *
+	 * If $info['id'] is set, it'll be linked to the project, otherwise
+	 * a new link will be inserted and then associated with the project.
+	 *
+	 * @param int $projectid
+	 * @param array $info
+	 * @return bool
+	 */
+	public static function link_insertupdate($projectid, $info = array())
+	{
+		$db = self::$db;
+
+		if (!$info['id']){
+			$existingId = $db->get("SELECT id 
+				FROM links 
+				INNER JOIN projects_links ON links.id = projects_links.linkid 
+				WHERE projectid=? AND title=?", $projectid, $info['tite']);
+
+			if(!$existingId){
+				return self::link_add($projectid, $info);
+			}
+
+			$info['id'] = $existingId;
+		}
+		$success = $db->execute("UPDATE links SET href=? WHERE id=?", $info['href'], $info['id']);
+		return $success;
+	}
+
 	/**
 	 * Remove a link from a project
 	 *

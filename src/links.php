@@ -13,9 +13,10 @@ $doc = doc::getdoc();
 $env = new env($doc);
 $doc->appendTitle('Edit Links');
 
-if (form::check_error('links')) {
-	var_dump($_REQUEST);
-	if ($_REQUEST['href']) {
+if (form::check_error('links')) 
+{
+	if ($_REQUEST['href']) 
+	{
 	  $href = $_REQUEST['href'];
 	  if (!preg_match('/^https?:\/\//', $href)) $href = 'http://'.$href;
 		db_layer::link_add($_REQUEST['id'], array(
@@ -26,10 +27,43 @@ if (form::check_error('links')) {
 		$_REQUEST['title'] = '';
 	}
 
-	foreach((array) $_REQUEST['lndelete'] as $lnid) {
+	if ($_REQUEST['projectcharter'])
+	{
+		$href = $_REQUEST['projectcharter'];
+		if (!preg_match('/^https?:\/\//', $href)) $href = 'http://'.$href;
+		db_layer::link_insertupdate($_REQUEST['id'], array(
+			'href' => $href,
+			'title' => 'Project Charter'
+		));
+	}
+
+	if ($_REQUEST['issuelog'])
+	{
+		$href = $_REQUEST['issuelog'];
+		if (!preg_match('/^https?:\/\//', $href)) $href = 'http://'.$href;
+		db_layer::link_insertupdate($_REQUEST['id'], array(
+			'href' => $href,
+			'title' => 'Issue Log'
+		));
+	}
+
+	if ($_REQUEST['livetimeline'])
+	{
+		$href = $_REQUEST['livetimeline'];
+		if (!preg_match('/^https?:\/\//', $href)) $href = 'http://'.$href;
+		db_layer::link_insertupdate($_REQUEST['id'], array(
+			'href' => $href,
+			'title' => 'Live Timeline'
+		));
+	}
+
+	foreach((array) $_REQUEST['lndelete'] as $lnid) 
+	{
 		db_layer::link_del($lnid, $_REQUEST['id']);
 	}
-	foreach((array) $_REQUEST['lnrestore'] as $lnid) {
+
+	foreach((array) $_REQUEST['lnrestore'] as $lnid) 
+	{
 		db_layer::link_add($_REQUEST['id'], array('id'=>$lnid));
 	}
 }
@@ -107,33 +141,6 @@ $title = new textbox($fs, 'title', '', 35);
 $title->setlabel('Title:');
 $titleLabel = $title->getlabel();
 $form->br();
-
-/*
-$slct = new select($fs, 'linktype', 'field');
-$slct->addOption('Op1', 'Other (enter title below)');
-$slct->addOption('Op2', 'Project Charter');
-$slct->addOption('Op3', 'Issue Log');
-$slct->addOption('Op4', 'Live Timeline');
-$slct->setlabel('Link Category: ');
-$slct->setSelected('Op1');
-$fs->br();
-
-$slct->addJS('onchange', "updateTitleBox(this.options[this.selectedIndex].label, this.form.title)");
-$doc->addJS('
-function updateTitleBox(sel, tb) {
-	if (sel == "Op1")
-	{
-		tb.value = "";
-		tb.disabled = false;
-	}
-	else
-	{
-		tb.value = sel;
-		tb.disabled = true;
-	}
-}
-');
-*/
 
 //Submit
 new submit($form, 'Submit Changes / New Link');

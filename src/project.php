@@ -134,19 +134,19 @@ foreach ($p['links'] as $ln) {
 	{
 		case 'Project Charter':
 			$cell_projectCharter->clearChildren();
-			$lnk = new link($cell_projectCharter, $info['file'], 'Click here for Project Charter', $info['vars']);
+			$lnk = new link($cell_projectCharter, $info['file'], $ln['title'], $info['vars']);
 			$lnk->target();
 			break;
 
 		case 'Issue Log':
 			$cell_issueLog->clearChildren();
-			$lnk = new link($cell_issueLog, $info['file'], 'Click here for Issue Log', $info['vars']);
+			$lnk = new link($cell_issueLog, $info['file'], $ln['title'], $info['vars']);
 			$lnk->target();
 			break;
 
 		case 'Live Timeline':
 			$cell_liveTimeline->clearChildren();
-			$lnk = new link($cell_liveTimeline, $info['file'], 'Click here for Live Timeline', $info['vars']);
+			$lnk = new link($cell_liveTimeline, $info['file'], $ln['title'], $info['vars']);
 			$lnk->target();
 			break;
 
@@ -220,7 +220,7 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 */
 
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
-	if (checkperm('owner', $p['id'])) $rowFirst->addCell(new link($linksgrp, 'links.php', 'edit', array('id'=>$histid)), 'col2');
+	if (checkperm('owner', $p['id'])) $rowFirst->addCell(new link($linksgrp, 'links.php', '[ edit ]', array('id'=>$histid)), 'col2');
 	if (checkperm('owner', $p['id'])) new link($attachgrp, 'attach.php', 'edit', array('id'=>$histid));
 	if (checkperm('manageprojects', $p['id']))
 		new link($grp, 'deleteproject.php', 'Delete Project', array('id'=>$histid));
