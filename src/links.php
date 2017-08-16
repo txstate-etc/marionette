@@ -63,12 +63,32 @@ foreach ((array) $deleted as $ln) {
 }
 
 $fs = new fieldset($form, 'Add Link');
+
 $href = new textbox($fs, 'href', '', 45);
 $href->setlabel('URL:');
+$fs->br(2);
+
+$slct = new select($fs, 'linktype', 'field');
+$slct->addOption('Op1', 'Other (enter title below)');
+$slct->addOption('Op2', 'Project Charter');
+$slct->addOption('Op3', 'Issue Log');
+$slct->addOption('Op4', 'Live Timeline');
+$slct->setlabel('Quick Title: ');
+$slct->setSelected('Op1');
 $fs->br();
+
 $title = new textbox($fs, 'title', '', 35);
 $title->setlabel('Title:');
 $form->br(2);
+
+$slct->addJS('onchange', 'updateTitleBox(this.options[this.selectedIndex].value)');
+$doc->addJS('
+function updateTitleBox(sel) {
+	alert("The option changed yall!!!");
+}
+');
+
+//var_dump($slct.options[$slct.selectedIndex].value);
 
 //Submit
 new submit($form, 'Submit Changes / New Link');
