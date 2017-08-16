@@ -14,6 +14,7 @@ $env = new env($doc);
 $doc->appendTitle('Edit Links');
 
 if (form::check_error('links')) {
+	var_dump($_REQUEST);
 	if ($_REQUEST['href']) {
 	  $href = $_REQUEST['href'];
 	  if (!preg_match('/^https?:\/\//', $href)) $href = 'http://'.$href;
@@ -44,51 +45,95 @@ $form = new form($env, 'links');
 new hidden($form, 'id', $p['id']);
 
 // list existing links
-if (!empty($p['links'])) $fs = new fieldset($form, 'Delete Links');
-foreach ($p['links'] as $ln) {
-	$box = new checkbox($fs, 'lndelete', $ln['id']);
-	$box->setlabel($ln['href'].' ('.$ln['title'].')', 'cbox');
-	$fs->br();
-}
+if (!empty($p['links'])) $fsExisting = new fieldset($form, 'Delete Links');
+
 
 // list deleted links, allow restoration
 function compare_rowids($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }
 $deleted = array_udiff($latest['links'], $p['links'], 'compare_rowids');
-if (!empty($deleted)) $fs = new fieldset($form, 'Restore Links');
+if (!empty($deleted)) $fsRestore = new fieldset($form, 'Restore Links');
 else $form->br();
 foreach ((array) $deleted as $ln) {
-	$box = new checkbox($fs, 'lnrestore', $ln['id']);
+	$box = new checkbox($fsRestore, 'lnrestore', $ln['id']);
 	$box->setlabel($ln['title'], 'cbox');
-	$fs->br();
+	$fsRestore->br();
 }
+
+$staticlinkfs = new fieldset($form, 'Static Links');
+
+$tbProjectCharter = new textbox($staticlinkfs, 'projectcharter', '', 45);
+$tbProjectCharter->setlabel('Project Charter: ');
+$staticlinkfs->br(2);
+
+$tbIssueLog = new textbox($staticlinkfs, 'issuelog', '', 45);
+$tbIssueLog->setlabel('Issue Log: ');
+$staticlinkfs->br(2);
+
+$tbLiveTimeline = new textbox($staticlinkfs, 'livetimeline', '', 45);
+$tbLiveTimeline->setlabel('Live Timeline:');
+$staticlinkfs->br();
+
+foreach ($p['links'] as $ln) {
+	switch($ln['title'])
+	{
+		case 'Project Charter':
+			$tbProjectCharter->setvalue($ln['href']);
+			break;
+
+		case 'Issue Log':
+			$tbIssueLog->setvalue($ln['href']);
+			break;
+		
+		case 'Live Timeline':
+			$tbLiveTimeline->setvalue($ln['href']);
+			break;
+
+		default:
+			$box = new checkbox($fsExisting, 'lndelete', $ln['id']);
+			$box->setlabel($ln['href'].' ('.$ln['title'].')', 'cbox');
+			$fsExisting->br();
+			break;	
+	}	
+}
+
 
 $fs = new fieldset($form, 'Add Link');
 
 $href = new textbox($fs, 'href', '', 45);
 $href->setlabel('URL:');
-$fs->br(2);
+$fs->br();
 
+$title = new textbox($fs, 'title', '', 35);
+$title->setlabel('Title:');
+$titleLabel = $title->getlabel();
+$form->br();
+
+/*
 $slct = new select($fs, 'linktype', 'field');
 $slct->addOption('Op1', 'Other (enter title below)');
 $slct->addOption('Op2', 'Project Charter');
 $slct->addOption('Op3', 'Issue Log');
 $slct->addOption('Op4', 'Live Timeline');
-$slct->setlabel('Quick Title: ');
+$slct->setlabel('Link Category: ');
 $slct->setSelected('Op1');
 $fs->br();
 
-$title = new textbox($fs, 'title', '', 35);
-$title->setlabel('Title:');
-$form->br(2);
-
-$slct->addJS('onchange', 'updateTitleBox(this.options[this.selectedIndex].value)');
+$slct->addJS('onchange', "updateTitleBox(this.options[this.selectedIndex].label, this.form.title)");
 $doc->addJS('
-function updateTitleBox(sel) {
-	alert("The option changed yall!!!");
+function updateTitleBox(sel, tb) {
+	if (sel == "Op1")
+	{
+		tb.value = "";
+		tb.disabled = false;
+	}
+	else
+	{
+		tb.value = sel;
+		tb.disabled = true;
+	}
 }
 ');
-
-//var_dump($slct.options[$slct.selectedIndex].value);
+*/
 
 //Submit
 new submit($form, 'Submit Changes / New Link');
