@@ -101,9 +101,27 @@ project_add_data_field($table, 'Status Update', $compre.$p['comment'], $compre.$
 function compare_rowids($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }
 
 // Links
+$rowFirst = new row($table);
+$rowFirst->addCell('Links:', 'col1');
+
+
+// Create specific rows for the Static Link Fields and keep track of them in variables
+$row_projectCharter = new row($table);
+$row_projectCharter -> addCell("   " . 'Project Charter:', 'col1');
+$cell_projectCharter = $row_projectCharter->addCell('None', 'col2');
+
+$row_issueLog = new row($table);
+$row_issueLog -> addCell("   " . 'Issue Log:', 'col1');
+$cell_issueLog = $row_issueLog->addCell('None', 'col2');
+
+$row_liveTimeline = new row($table);
+$row_liveTimeline -> addCell("   " . 'Live Timeline:', 'col1');
+$cell_liveTimeline = $row_liveTimeline->addCell('None', 'col2');
+
 $row = new row($table);
-$row->addCell('Links:', 'col1');
-$cell = new cell($row);
+$row->addCell("   " . 'Other:', 'col1');
+$cell = $row->addCell('', 'col2');
+
 $linksgrp = new linkgroup($cell, array('right'=>' ] '));
 $grp = new linkgroup($cell, array('nobound'=>TRUE, 'separator'=>"\n"));
 foreach ($latest['links'] as $ln) {
@@ -111,10 +129,37 @@ foreach ($latest['links'] as $ln) {
 }
 foreach ($p['links'] as $ln) {
 	$info = link::parse_href($ln['href']);
-	$lnk = new link($grp, $info['file'], $ln['title'], $info['vars']);
-	$lnk->target();
-	if ($info['hash']) $lnk->sethash($info['hash']);
-	if (!$wasthere[$ln['id']]) new red_asterisk($lnk);
+
+	switch($ln['title'])
+	{
+		case 'Project Charter':
+			$cell_projectCharter->clearChildren();
+			$lnk = new link($cell_projectCharter, $info['file'], 'Click here for Project Charter', $info['vars']);
+			$lnk->target();
+			break;
+
+		case 'Issue Log':
+			$cell_issueLog->clearChildren();
+			$lnk = new link($cell_issueLog, $info['file'], 'Click here for Issue Log', $info['vars']);
+			$lnk->target();
+			break;
+
+		case 'Live Timeline':
+			$cell_liveTimeline->clearChildren();
+			$lnk = new link($cell_liveTimeline, $info['file'], 'Click here for Live Timeline', $info['vars']);
+			$lnk->target();
+			break;
+
+		default:
+			$lnk = new link($grp, $info['file'], $ln['title'], $info['vars']);
+			$lnk->target();
+			if ($info['hash']) $lnk->sethash($info['hash']);
+			if (!$wasthere[$ln['id']]) new red_asterisk($lnk);
+			break;
+	}
+
+	
+	
 }
 // were there any links on the last publish that have now disappeared?
 $deleted = array_udiff($latest['links'], $p['links'], 'compare_rowids');
@@ -128,7 +173,7 @@ foreach ((array) $deleted as $ln) {
 
 // Attachments
 $row = new row($table);
-$row->addCell('Attachments:', 'col1');
+$row->addCell('Other Documents:', 'col1');
 $cell = new cell($row);
 $attachgrp = new linkgroup($cell, array('right'=>' ] '));
 $grp = new linkgroup($cell, array('nobound'=>TRUE, 'separator'=>', '));
@@ -175,7 +220,7 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 */
 
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
-	if (checkperm('owner', $p['id'])) new link($linksgrp, 'links.php', 'edit', array('id'=>$histid));
+	if (checkperm('owner', $p['id'])) $rowFirst->addCell(new link($linksgrp, 'links.php', 'edit', array('id'=>$histid)), 'col2');
 	if (checkperm('owner', $p['id'])) new link($attachgrp, 'attach.php', 'edit', array('id'=>$histid));
 	if (checkperm('manageprojects', $p['id']))
 		new link($grp, 'deleteproject.php', 'Delete Project', array('id'=>$histid));
