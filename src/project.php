@@ -173,7 +173,9 @@ foreach ((array) $deleted as $ln) {
 
 // Attachments
 $row = new row($table);
-$row->addCell('Other Documents:', 'col1');
+$row->addCell(" ");
+$row = new row($table);
+$row->addCell('*** Attachments: ', 'col1');
 $cell = new cell($row);
 $attachgrp = new linkgroup($cell, array('right'=>' ] '));
 $grp = new linkgroup($cell, array('nobound'=>TRUE, 'separator'=>', '));
@@ -190,6 +192,11 @@ foreach ((array) $deleted as $att) {
 	$lnk = new link($grp, 'attachment.php', $att['filename'], array('id'=>$att['id']), 'attach_deleted');
 	new red_asterisk($lnk);
 }
+
+$rowCaption = new row($table);
+$rowCaption->addCell(" ");
+$rowCaption = new row($table);
+$rowCaption->addCell('*** = This field is deprecated and will be removed in a future Marionette release. Use the Links section instead.');
 
 // Project Links (sidebar)
 if ($ispublish) $histid = $p['publishof'];
@@ -221,7 +228,12 @@ if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'com
 
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
 	if (checkperm('owner', $p['id'])) $rowFirst->addCell(new link($linksgrp, 'links.php', '[ edit ]', array('id'=>$histid)), 'col2');
-	if (checkperm('owner', $p['id'])) new link($attachgrp, 'attach.php', 'edit', array('id'=>$histid));
+
+	// Removed the Edit button, since the Attachments functionality has now been deprecated
+	// This will allow users to access existing Attachments for the time being, but prevent them
+	// from editing or adding
+	//if (checkperm('owner', $p['id'])) new link($attachgrp, 'attach.php', 'edit', array('id'=>$histid));
+
 	if (checkperm('manageprojects', $p['id']))
 		new link($grp, 'deleteproject.php', 'Delete Project', array('id'=>$histid));
 	if (!checkperm('completeproject', $p['id']) && $p['complete']!='complete')

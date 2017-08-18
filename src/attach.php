@@ -11,7 +11,7 @@ require_once("common.php");
 
 $doc = doc::getdoc();
 $env = new env($doc);
-$doc->appendTitle('Edit/Upload Other Documents');
+$doc->appendTitle('Edit/Upload Attachments');
 
 if (form::check_error('attach')) {
 	$file = new file('upload');
@@ -44,7 +44,7 @@ $form = new form($env, 'attach');
 new hidden($form, 'id', $p['id']);
 
 // list existing attachments
-if (!empty($p['attach'])) $fs = new fieldset($form, 'Delete Documents');
+if (!empty($p['attach'])) $fs = new fieldset($form, 'Delete Attachments');
 foreach ($p['attach'] as $att) {
 	$box = new checkbox($fs, 'attdelete', $att['id']);
 	$box->setlabel($att['filename'], 'cbox');
@@ -54,7 +54,7 @@ foreach ($p['attach'] as $att) {
 // list deleted attachments, allow restoration
 function compare_attach($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }
 $deleted = array_udiff($latest['attach'], $p['attach'], 'compare_attach');
-if (!empty($deleted)) $fs = new fieldset($form, 'Restore Documentss');
+if (!empty($deleted)) $fs = new fieldset($form, 'Restore Attachments');
 else $form->br();
 foreach ((array) $deleted as $att) {
 	$box = new checkbox($fs, 'attrestore', $att['id']);
