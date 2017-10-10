@@ -1333,14 +1333,28 @@ class db_layer {
 	public static function trait_delete($type, $id) {
 		$db = self::$db;
 
-		if ($type == 'phases') { 
-			$used = $db->get("SELECT id FROM projects WHERE phaseid=?", $id);
-		} elseif ($type == 'classification') {
-			$used = $db->get("SELECT id FROM projects WHERE classification=?", $id);
-		} else {
-			$used = $db->get("SELECT id FROM traits WHERE $type=?", $id);
-			print("SELECT id FROM traits WHERE $type=$id");
+		switch ($type)
+		{
+			case 'phases':
+				$used = $db->get("SELECT id FROM projects WHERE phaseid=?", $id);
+				break;
+
+			case 'classification':
+				$used = $db->get("SELECT id FROM projects WHERE classification=?", $id);
+				break;
+
+			default:
+				$used = $db->get("SELECT id FROM traits WHERE $type=?", $id);
+				break;
 		}
+
+		// if ($type == 'phases') { 
+			
+		// } elseif ($type == 'classification') {
+			
+		// } else {
+			
+		// }
 
 		if ($used) {
 			$db->execute("UPDATE $type SET deleted=1 WHERE id=?", $id);
