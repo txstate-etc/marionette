@@ -317,6 +317,19 @@ function phasehide(sel) {
 
 	$form->br();
 
+	//Trend (aka now - Timeline)
+	$sel = new select($form, 'overall_trend');
+	$sel->setlabel('Timeline:');
+	$sel->setid('timeline');
+	$sel->addOption('', '------');
+	foreach($traits['trend'] as $t) {
+		$sel->addOption($t['id'], $t['name']);
+	}
+	$sel->setSelected($p['overall']['trend']);
+	if ($editing && !$owner) $sel->disabled();
+
+	$form->br();
+
 	//Status Update
 	$tarea = new textarea($form, 'comment', 50, 10, $p['comment']);
 	$tarea->setlabel('Status Update:');

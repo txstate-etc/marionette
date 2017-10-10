@@ -96,6 +96,8 @@ project_add_data_field($table, 'Project Lead', (checkperm('viewcurrent', $p['id'
 project_add_data_field($table, 'Phase', $p['phase'], $latest['phase']);
 $status_icon = '[i class="status_'.strToLower($p['overall']['status_name']).'"][/i]';
 project_add_data_field($table, 'Health', $status_icon.$p['overall']['status_name'], $status_icon.$latest['overall']['status_name']);
+$timelineValue = $p['overall']['trend'] == 0 ? 'None' : $p['overall']['trend_name'];
+project_add_data_field($table, 'Timeline', $timelineValue, $timelineValue, false);
 project_add_data_field($table, 'Status Update', $compre.$p['comment'], $compre.$latest['comment']);
 
 function compare_rowids($a, $b) { return ($a['id'] == $b['id'] ? 0 : ($a['id'] < $b['id'] ? -1 : 1)); }

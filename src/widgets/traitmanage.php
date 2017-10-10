@@ -70,7 +70,6 @@ class traitmanage extends widget {
 		$d = $settings['data'];  // all the data to be listed
 		$ec = (array) $settings['extracontrols'];  // a list of extra columns that need to be elicited on each line
 		if (!$settings['submit']) $settings['submit'] = 'Save Entry Changes';
-		
 		if (form::check_error($settings['type'])) {
 			if (preg_match('/move(\d*)/', $_REQUEST['submit'], $match)) {
 				$id = $match[1];
