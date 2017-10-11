@@ -10,6 +10,7 @@ require_once("widgets/projectlist.php");
 
 $doc = doc::getdoc();
 $user = doc::getuser();
+$doc->includeJS("!FileSaver.js");
 
 $env = new env($doc);
 $doc->appendTitle('Projects');
@@ -57,19 +58,18 @@ if ($complete == -1 && checkperm('createnew')) {
 $lnk = new link($grp, '#', 'Export CSV');
 $lnk->addJS('onclick', "exportFile();");
 
-$projectCsvString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Health, Timeline, Status Update\n";
+$projectCsvString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Health, Timeline\n";
 foreach ($projects as $proj) {
-	$projectCsvString = $projectCsvString . "\"" . $proj['target'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['name'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['master_name'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['unit_abbr'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['classification_name'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['phase'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['current_manager'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['modified'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['overall']['status_name'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['overall']['trend_name'] . "\",";
-	$projectCsvString = $projectCsvString . "\"" . $proj['comment'] . "\"\n";
+	$projectCsvString .= "\"" . $proj['target'] . "\",";
+	$projectCsvString .= "\"" . htmlspecialchars($proj['name']) . "\",";
+	$projectCsvString .= "\"" . $proj['master_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['unit_abbr'] . "\",";
+	$projectCsvString .= "\"" . $proj['classification_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['phase'] . "\",";
+	$projectCsvString .= "\"" . $proj['current_manager'] . "\",";
+	$projectCsvString .= "\"" . $proj['modified'] . "\",";
+	$projectCsvString .= "\"" . $proj['overall']['status_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['overall']['trend_name'] . "\"\r\n";
 }
 
 new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
@@ -77,10 +77,9 @@ new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$l
 $doc->output();
 ?>
 
-<script type="text/javascript" src="js/FileSaver.js"></script>
 <script type="text/javascript">
 	function exportFile() {
 		var myText = <?php echo json_encode($projectCsvString); ?>;
 		saveTextAs(myText, "MarionetteExport.csv");
 	}
-</script>	
+</script>	 

@@ -26,6 +26,7 @@ $doc->includeJS('!jscal/calendar.js');
 $doc->includeJS('!jscal/calendar-en.js');
 $doc->includeJS('!jscal/calendar-setup.js');
 $doc->includeJS('!dateformat.js');
+$doc->includeJS("!FileSaver.js");
 
 function construct_query_parms($rules) {
 	$parmString = '';
@@ -77,6 +78,8 @@ if (form::check_error('filters')) {
 
 // elicit filter options from the user
 $div = new div($env, 'filtertoggle');
+$lnk = new link($env, '#', 'Export CSV');
+$lnk->addJS('onclick', "exportFile();");
 $lnk = new link($div, '#', 'Edit Custom Filters');
 $form = new form($env, 'filters');
 $form->setid('filterarea');
@@ -241,8 +244,28 @@ $projects = db_layer::project_getmany($project_parms);
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
 
+$projectCsvString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Health, Timeline\n";
+foreach ($projects as $proj) {
+	$projectCsvString .= "\"" . $proj['target'] . "\",";
+	$projectCsvString .= "\"" . htmlspecialchars($proj['name']) . "\",";
+	$projectCsvString .= "\"" . $proj['master_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['unit_abbr'] . "\",";
+	$projectCsvString .= "\"" . $proj['classification_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['phase'] . "\",";
+	$projectCsvString .= "\"" . $proj['current_manager'] . "\",";
+	$projectCsvString .= "\"" . $proj['modified'] . "\",";
+	$projectCsvString .= "\"" . $proj['overall']['status_name'] . "\",";
+	$projectCsvString .= "\"" . $proj['overall']['trend_name'] . "\"\r\n";
+}
+
 new project_list($env, array('data'=>$projects, 'sortable'=>false, 'lastpage'=>$lastpage));
 
 $doc->output();
 
 ?>
+<script type="text/javascript">
+	function exportFile() {
+		var myText = <?php echo json_encode($projectCsvString); ?>;
+		saveTextAs(myText, "FilteredMarionetteExport.csv");
+	}
+</script>	 

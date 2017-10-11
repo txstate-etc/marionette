@@ -1348,14 +1348,6 @@ class db_layer {
 				break;
 		}
 
-		// if ($type == 'phases') { 
-			
-		// } elseif ($type == 'classification') {
-			
-		// } else {
-			
-		// }
-
 		if ($used) {
 			$db->execute("UPDATE $type SET deleted=1 WHERE id=?", $id);
 		} else {
