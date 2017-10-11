@@ -28,6 +28,8 @@ class project_list extends widget {
 		else $trow->addSortable("Modified", 'modified', 'date');
 		if (!$sortable) $trow->addCell("Health", 'status');
 		else $trow->addSortable("Health", 'overall', 'status');
+		if (!$sortable) $trow->addCell("Timeline", 'trend');
+		else $trow->addSortable("Timeline", 'overall', 'trend');
 		$trow->addCell("Status Update", 'comment');
 
 		foreach ($projects as $p) {
@@ -52,6 +54,7 @@ class project_list extends widget {
 			$published = date_from_database($p['modified']);
 			$row->addCell(relative_date($published, TRUE, TRUE), 'modified');
 			$row->addCell('  ', 'status'.strToLower($p['overall']['status_name']));
+			$row->addCell($p['overall']['trend_name'] == '' ? 'None' : $p['overall']['trend_name'], 'timeline');
 			$row->addCell($p['comment']);
 		}
 
