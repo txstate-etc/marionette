@@ -241,6 +241,26 @@ else
 	$project_parms['filterid'] = db_layer::filter_current($user->userid());
 }
 
+// figure out how to sort
+if (!$_REQUEST['sort']) {
+	// no sort requested, let's check their session for a saved pref
+	if ($user->grab('sort')) {
+		$_REQUEST['sort'] = $user->grab('sort');
+		$_REQUEST['desc'] = $user->grab('desc');
+	} else {
+		$_REQUEST['sort'] = 'target'; // default sort
+	}
+} else {
+	// sort requested, let's save it as a session preference
+	$user->store('sort', $_REQUEST['sort']);
+	$user->store('desc', $_REQUEST['desc']);
+}
+
+$project_parms['sort'] = array(
+		array($_REQUEST['sort'], ($_REQUEST['desc'] ? 'DESC' : 'ASC')),
+		array('target', 'ASC')
+	);
+
 $projects = db_layer::project_getmany($project_parms);
 
 $foundrows = db_layer::$foundrows;
@@ -248,7 +268,7 @@ $lastpage = ceil($foundrows / $perpage);
 
 $projectCsvString = csvHelper::createCsv($projects);
 
-new project_list($env, array('data'=>$projects, 'sortable'=>false, 'lastpage'=>$lastpage));
+new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
 
 $doc->output();
 
