@@ -11,6 +11,8 @@
 
 require_once("common.php");
 require_once("widgets/projectlist.php");
+require_once("csvHelper.php");
+
 
 $doc = doc::getdoc();
 $user = doc::getuser();
@@ -244,19 +246,7 @@ $projects = db_layer::project_getmany($project_parms);
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
 
-$projectCsvString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Health, Timeline\n";
-foreach ($projects as $proj) {
-	$projectCsvString .= "\"" . $proj['target'] . "\",";
-	$projectCsvString .= "\"" . htmlspecialchars($proj['name']) . "\",";
-	$projectCsvString .= "\"" . $proj['master_name'] . "\",";
-	$projectCsvString .= "\"" . $proj['unit_abbr'] . "\",";
-	$projectCsvString .= "\"" . $proj['classification_name'] . "\",";
-	$projectCsvString .= "\"" . $proj['phase'] . "\",";
-	$projectCsvString .= "\"" . $proj['current_manager'] . "\",";
-	$projectCsvString .= "\"" . $proj['modified'] . "\",";
-	$projectCsvString .= "\"" . $proj['overall']['status_name'] . "\",";
-	$projectCsvString .= "\"" . $proj['overall']['trend_name'] . "\"\r\n";
-}
+$projectCsvString = csvHelper::createCsv($projects);
 
 new project_list($env, array('data'=>$projects, 'sortable'=>false, 'lastpage'=>$lastpage));
 
