@@ -12,7 +12,7 @@
 require_once("common.php");
 require_once("widgets/projectlist.php");
 require_once("csvHelper.php");
-
+require_once("widgets/csvLink.php");
 
 $doc = doc::getdoc();
 $user = doc::getuser();
@@ -28,7 +28,6 @@ $doc->includeJS('!jscal/calendar.js');
 $doc->includeJS('!jscal/calendar-en.js');
 $doc->includeJS('!jscal/calendar-setup.js');
 $doc->includeJS('!dateformat.js');
-$doc->includeJS("!FileSaver.js");
 
 function construct_query_parms($rules) {
 	$parmString = '';
@@ -80,9 +79,12 @@ if (form::check_error('filters')) {
 
 // elicit filter options from the user
 $div = new div($env, 'filtertoggle');
-$lnk = new link($env, '#', 'Export CSV');
-$lnk->addJS('onclick', "exportFile();");
-$lnk = new link($div, '#', 'Edit Custom Filters');
+
+if ($user->userid()) {
+	$csvLink = new csvLink($env);
+	$lnk = new link($div, '#', 'Edit Custom Filters');
+}
+
 $form = new form($env, 'filters');
 $form->setid('filterarea');
 $filts = new div($form, 'filtersonly');
@@ -263,19 +265,17 @@ $project_parms['sort'] = array(
 
 $projects = db_layer::project_getmany($project_parms);
 
+// Populate csvLink if it exists. 
+// csvLink only exist if the user is authenticated
+if ($csvLink) {
+	$csvLink->populate(array('projectList'=>$projects, 'filename'=>'FilteredMarionetteExport.csv'));
+}
+
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
-
-$projectCsvString = csvHelper::createCsv($projects);
 
 new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
 
 $doc->output();
 
 ?>
-<script type="text/javascript">
-	function exportFile() {
-		var myText = <?php echo json_encode($projectCsvString); ?>;
-		saveTextAs(myText, "FilteredMarionetteExport.csv");
-	}
-</script>	 

@@ -7,11 +7,10 @@
 
 require_once("common.php");
 require_once("widgets/projectlist.php");
-require_once("csvHelper.php");
+require_once("widgets/csvLink.php");
 
 $doc = doc::getdoc();
 $user = doc::getuser();
-$doc->includeJS("!FileSaver.js");
 
 $env = new env($doc);
 $doc->appendTitle('Projects');
@@ -56,19 +55,9 @@ if ($complete == -1 && checkperm('createnew')) {
 	$lnk = new link($grp, 'editproject.php', 'Create a New Project');
 }
 
-$lnk = new link($grp, '#', 'Export CSV');
-$lnk->addJS('onclick', "exportFile();");
-
-$projectCsvString = csvHelper::createCsv($projects);
+$lnk = new csvLink($grp, array('projectList'=>$projects, 'filename'=>'AllMarionetteExport.csv'));
 
 new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
 
 $doc->output();
-?>
-
-<script type="text/javascript">
-	function exportFile() {
-		var myText = <?php echo json_encode($projectCsvString); ?>;
-		saveTextAs(myText, "MarionetteExport.csv");
-	}
-</script>	 
+?> 

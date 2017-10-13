@@ -21,11 +21,16 @@ $user = new manage_user();
 $doc = new doc($user);
 $doc->showbuildtime();
 
-if (!$user->userid() && !preg_match('/login\.php/',$_SERVER['PHP_SELF'])) {
-	$user->store('redirect_after_login', $_SERVER['REQUEST_URI']);
-	$doc->refresh(0, 'login.php', array($user->sidname()=>$user->sid()), db_layer::setting('ssl_login'));
-	$doc->output();
-	exit;
+if (!$user->userid()) {
+	$notLoginPage = preg_match('/login\.php/',$_SERVER['PHP_SELF']) == 0;
+	$notFilteredPage = preg_match('/filtered\.php/',$_SERVER['PHP_SELF']) == 0;
+
+	if ($notLoginPage && $notFilteredPage) {
+		$user->store('redirect_after_login', $_SERVER['REQUEST_URI']);
+		$doc->refresh(0, 'login.php', array($user->sidname()=>$user->sid()), db_layer::setting('ssl_login'));
+		$doc->output();
+		exit;
+	}
 }
 
 ?>
