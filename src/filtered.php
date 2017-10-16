@@ -11,7 +11,6 @@
 
 require_once("common.php");
 require_once("widgets/projectlist.php");
-require_once("csvHelper.php");
 require_once("widgets/csvLink.php");
 
 $doc = doc::getdoc();
