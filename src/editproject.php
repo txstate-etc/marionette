@@ -301,9 +301,9 @@ function phasehide(sel) {
 
 	$form->br();
 
-	// Health
+	// Health (aka now - Risk)
 	$sel = new select($form, 'overall_status');
-	$sel->setlabel('Health:');
+	$sel->setlabel('Risk:');
 	$sel->setid('health');
 	$sel->addOption('', '------');
 	$traits = db_layer::traits_lists();

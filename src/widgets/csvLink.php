@@ -27,7 +27,7 @@ class csvLink extends widget {
 			$setUpOnce = true;
 		}
 
-		$returnString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Health, Timeline\r\n";
+		$returnString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Risk, Timeline\r\n";
 		foreach ($projectList as $proj) {
 			$returnString .= csvLink::cleanCsvString($proj['target']) . ",";
 			$returnString .= csvLink::cleanCsvString($proj['name']) . ",";

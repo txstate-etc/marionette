@@ -95,7 +95,7 @@ project_add_data_field($table, 'Project Level', $p['unit_name'].' ('.$p['unit_ab
 project_add_data_field($table, 'Project Lead', (checkperm('viewcurrent', $p['id']) || $p['id'] != $latest['id'] ? $p['manager_name'] : $p['current_manager']), $latest['manager_name']);
 project_add_data_field($table, 'Phase', $p['phase'], $latest['phase']);
 $status_icon = '[i class="status_'.strToLower($p['overall']['status_name']).'"][/i]';
-project_add_data_field($table, 'Health', $status_icon.$p['overall']['status_name'], $status_icon.$latest['overall']['status_name']);
+project_add_data_field($table, 'Risk', $status_icon.$p['overall']['status_name'], $status_icon.$latest['overall']['status_name']);
 $timelineValue = $p['overall']['trend'] == 0 ? 'None' : $p['overall']['trend_name'];
 project_add_data_field($table, 'Timeline', $timelineValue, $timelineValue, false);
 project_add_data_field($table, 'Status Update', $compre.$p['comment'], $compre.$latest['comment']);

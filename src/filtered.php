@@ -106,7 +106,7 @@ $slct->addOption('phaseid', 'Project Phase', FALSE, 'list');
 $slct->addOption('unit', 'Level', FALSE, 'list');
 $slct->addOption('classification', 'Project Type', FALSE, 'list');
 $slct->addOption('goal', 'Goal', FALSE, 'search');
-$slct->addOption('overall', 'Health', FALSE, 'list');
+$slct->addOption('overall', 'Risk', FALSE, 'list');
 $slct->addOption('comment', 'Project Status', FALSE, 'search');
 $slct->setid('field1');
 

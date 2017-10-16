@@ -65,7 +65,7 @@ foreach ($publishes as $whichversion => $pub) {
 	// Phase
 	$cell = $row->addCell($pub['phase'], 'phase');
 
-	// Health
+	// Health (aka now - Risk)
 	$cell = $row->addCell('', 'status'.strToLower($pub['overall']['status_name']));
 
 	// Comment

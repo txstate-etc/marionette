@@ -26,8 +26,8 @@ class project_list extends widget {
 		else $trow->addSortable("Lead", 'manager_name', 'pm');
 		if (!$sortable) $trow->addCell("Modified", 'modified');
 		else $trow->addSortable("Modified", 'modified', 'date');
-		if (!$sortable) $trow->addCell("Health", 'status');
-		else $trow->addSortable("Health", 'overall', 'status');
+		if (!$sortable) $trow->addCell("Risk", 'status');
+		else $trow->addSortable("Risk", 'overall', 'status');
 		if (!$sortable) $trow->addCell("Timeline", 'trend');
 		else $trow->addSortable("Timeline", 'overall', 'trend');
 		$trow->addCell("Status Update", 'comment');
