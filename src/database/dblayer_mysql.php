@@ -802,6 +802,44 @@ class db_layer {
 	}
 
 	/**
+	* Create a csv export list of projects
+	*
+	* Retrieves all or a filtered subset of the project data, and returns the data as
+	* a csv string suitable for writing to a csv file
+	*
+	* @param array $filters
+	* @return string
+	**/
+	public static function project_getcsv($filters = array()) {
+		$returnString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Risk, Timeline\r\n";
+
+		// Ensure we are not paging db results. We want ALL results for the csv file
+		if ($filters['perpage']) { 
+			unset($filters['perpage']);
+		}
+
+		$csvData = self::project_getmany($filters);
+		foreach ($csvData as $proj) {
+			$returnString .= self::cleanCsvString($proj['target']) . ",";
+			$returnString .= self::cleanCsvString($proj['name']) . ",";
+			$returnString .= self::cleanCsvString($proj['master_name']) . ",";
+			$returnString .= self::cleanCsvString($proj['unit_abbr']) . ",";
+			$returnString .= self::cleanCsvString($proj['classification_name']) . ",";
+			$returnString .= self::cleanCsvString($proj['phase']) . ",";
+			$returnString .= self::cleanCsvString($proj['current_manager']) . ",";
+			$returnString .= self::cleanCsvString($proj['modified']) . ",";
+			$returnString .= self::cleanCsvString($proj['overall']['status_name']) . ",";
+			$returnString .= self::cleanCsvString($proj['overall']['trend_name']) . "\r\n";
+		}
+
+		return $returnString;
+	}
+
+	function cleanCsvString($text) {
+		return "\"" . str_replace("\"", "\"\"", $text) . "\"";
+	}
+
+	/**
 	 * Retrieve an array of projects
 	 *
 	 * This is the master project retrieval function. project_get() depends on this

@@ -11,7 +11,8 @@
 
 require_once("common.php");
 require_once("widgets/projectlist.php");
-require_once("widgets/csvLink.php");
+
+session_start();
 
 $doc = doc::getdoc();
 $user = doc::getuser();
@@ -80,8 +81,8 @@ if (form::check_error('filters')) {
 $div = new div($env, 'filtertoggle');
 
 if ($user->userid()) {
-	$csvLink = new csvLink($env);
 	$lnk = new link($div, '#', 'Edit Custom Filters');
+	$lnk = new link($env, 'csvdownload.php', 'Export CSV');
 }
 
 $form = new form($env, 'filters');
@@ -202,7 +203,8 @@ if (is_null($filtdata))
 	//If the user came to this page via a submit (aka - clicking the Apply Filters button)
 	//Then redirect to the parameterized URL...
 
-	if(!is_null($_POST["pwo_submit"]))
+	//if(!is_null($_POST["pwo_submit"]))
+	if ($user->userid())
 	{
 		$URL = 'filtered.php';
 		$qparms = construct_query_parms($filtdata);
@@ -263,17 +265,11 @@ $project_parms['sort'] = array(
 	);
 
 $projects = db_layer::project_getmany($project_parms);
-
-// Populate csvLink if it exists. 
-// csvLink only exist if the user is authenticated
-if ($csvLink) {
-	$csvLink->populate(array('projectList'=>$projects, 'filename'=>'FilteredMarionetteExport.csv'));
-}
-
+$_SESSION['currentfilter'] = $project_parms;
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
 
-new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
+new project_list($env, array('data'=>$projects, 'sortable'=>$user->userid() ? true : false, 'lastpage'=>$lastpage));
 
 $doc->output();
 

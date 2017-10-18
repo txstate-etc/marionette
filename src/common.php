@@ -23,9 +23,12 @@ $doc->showbuildtime();
 
 if (!$user->userid()) {
 	$notLoginPage = preg_match('/login\.php/',$_SERVER['PHP_SELF']) == 0;
-	$notFilteredPage = preg_match('/filtered\.php/',$_SERVER['PHP_SELF']) == 0;
 
-	if ($notLoginPage && $notFilteredPage) {
+	$urlParams = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+	$filteredMatch = preg_match('/filtered\.php/',$_SERVER['PHP_SELF']);
+	$notParameterizedFilteredPage = $filteredMatch == 0 || ($filteredMatch != 0 && $urlParams == null);
+
+	if ($notLoginPage && $notParameterizedFilteredPage) {
 		$user->store('redirect_after_login', $_SERVER['REQUEST_URI']);
 		$doc->refresh(0, 'login.php', array($user->sidname()=>$user->sid()), db_layer::setting('ssl_login'));
 		$doc->output();

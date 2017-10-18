@@ -7,7 +7,8 @@
 
 require_once("common.php");
 require_once("widgets/projectlist.php");
-require_once("widgets/csvLink.php");
+
+session_start();
 
 $doc = doc::getdoc();
 $user = doc::getuser();
@@ -35,7 +36,7 @@ $complete = ($_REQUEST['complete'] ? 1 : -1);
 
 // grab all our projects
 $perpage = db_layer::setting('pl_perpage');
-$projects = db_layer::project_getmany(array(
+$filter = array(
 	'latestpublish' => !checkperm('viewcurrent'), 
 	'manager_show_current'=>$user->userid(),
 	'complete' => $complete,
@@ -46,7 +47,11 @@ $projects = db_layer::project_getmany(array(
 		array($_REQUEST['sort'], ($_REQUEST['desc'] ? 'DESC' : 'ASC')),
 		array('target', 'ASC')
 	)
-));
+);
+
+$_SESSION['currentfilter'] = $filter;
+
+$projects = db_layer::project_getmany($filter);
 $foundrows = db_layer::$foundrows;
 $lastpage = ceil($foundrows / $perpage);
 
@@ -55,7 +60,7 @@ if ($complete == -1 && checkperm('createnew')) {
 	$lnk = new link($grp, 'editproject.php', 'Create a New Project');
 }
 
-$lnk = new csvLink($grp, array('projectList'=>$projects, 'filename'=>'AllMarionetteExport.csv'));
+$lnk = new link($grp, 'csvdownload.php', 'Export CSV');
 
 new project_list($env, array('data'=>$projects, 'sortable'=>true, 'lastpage'=>$lastpage));
 
