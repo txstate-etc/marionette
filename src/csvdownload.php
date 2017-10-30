@@ -1,7 +1,7 @@
 <?php
 require_once("common.php");
 session_start();
-header('Content-Type: application/excel');
+header('Content-Type: text/csv');
 header('Content-Disposition: attachment; filename="MarionetteExport.csv"');
 
 $doc = doc::getdoc();

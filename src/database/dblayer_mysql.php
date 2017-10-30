@@ -380,6 +380,14 @@ class db_layer {
 			$success = $db->execute("ALTER TABLE permissions ADD addcomment TINYINT UNSIGNED NOT NULL AFTER publish");
 			if ($success) self::setting_set('db_version', 18);
 		}
+		if ($success && self::setting('db_version') == 18) {
+			$success = $db->execute("CREATE TABLE project_team (
+							userid mediumint(8) unsigned NOT NULL,
+							projectid mediumint(8) unsigned NOT NULL,
+							PRIMARY KEY ( userid,projectid )
+						  ) ENGINE = MyISAM DEFAULT CHARSET=latin1");
+			if ($success) self::setting_set('db_version', 19);
+		}
 		return $success;
 	}
 
@@ -988,6 +996,7 @@ class db_layer {
 			$ret[$k]['overall'] = self::traits_get($row['overalltraits']);
 			$ret[$k]['attach'] = self::project_attach($row['id']);
 			$ret[$k]['links'] = self::project_links($row['id']);
+			$ret[$k]['projectteam'] = self::projectteam_get($row['id']);
 		}
 
 		if ($filters['sort']) {
@@ -1137,6 +1146,7 @@ class db_layer {
 		$resource = self::traits_update($data['resource']);
 		$quality = self::traits_update($data['quality']);
 		$overall = self::traits_update($data['overall']);
+		$projectteam = self::projectteam_update($data['id'], $data['projectteam']);
 
 		// update the project itself
 		$db->execute("UPDATE projects SET publishof=?, modified=NOW(), modifiedby=?, manager=?, name=?, master=?, goal=?, classification=?, unit=?,
@@ -1422,6 +1432,56 @@ class db_layer {
 		}
 		$db->execute("UPDATE $type SET ".implode(',', $cols)." WHERE id=?", $bind, $id);
 		return $id;
+	}
+
+	/**
+	 * Add a project team member to a project (or publish)
+	 *
+	 * Links the user indicated by $userid to the project indicated by $projectid
+	 *
+	 * @param int $projectid
+	 * @param int $userid
+	 * @return bool
+	 */
+	public static function projectteam_add($projectid, $userid) {
+		$db = self::$db;
+		$existing = $db->get("SELECT * FROM project_team  
+		 		WHERE projectid=? AND userid=?", $projectid, $userid);
+		if (!$existing) {
+			return $db->execute("INSERT INTO project_team (userid, projectid) VALUES (?,?)", $userid, $projectid);
+		}
+		return true;
+	}
+
+	/**
+	 * Remove a project team member from a project
+	 *
+	 * If $info['id'] is set, it'll be linked to the project, otherwise
+	 * a new link will be inserted and then associated with the project.
+	 *
+	 * @param int $projectid
+	 * @param int $userid
+	 * @return bool
+	 */
+	public static function projectteam_del($projectid, $userid) {
+		return self::$db->execute("DELETE FROM project_team WHERE userid=? AND projectid=?", $userid, $projectid);
+	}
+
+	/**
+	 * Get the project team list for a project
+	 *
+	 * Returns all users that are members of the project team
+	 * for the project indicated by $projectid
+	 *
+	 * @param int $projectid
+	 * @return array
+	 */
+	public static function projectteam_get($projectid) {
+		$db = self::$db;
+		return $db->getall("SELECT pt.projectid, pt.userid, u.firstname, u.lastname, CONCAT(u.firstname,' ',u.lastname) AS displayname 
+			FROM project_team pt 
+			INNER JOIN users u ON pt.userid = u.userid
+			WHERE pt.projectid=?", $projectid);
 	}
 
 	/**

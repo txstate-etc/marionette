@@ -8,6 +8,7 @@
  */
 
 require_once("common.php");
+require_once("widgets/projectTeamList.php");
 
 $doc = doc::getdoc();
 $env = new env($doc);
@@ -33,19 +34,6 @@ if ($haspublishes && $p['complete'] != 'complete') {
 		$span->addText('You are viewing an older publish of this project.  Click ');
 		new link($span, 'project.php', 'here', array('id'=>$latest));
 		$span->addText(' for the latest published version.');
-	} elseif (checkperm('viewcurrent', $p['id'])) {
-		/*
-		$span = new div($env, 'oldpublish');
-		if ($latest['id'] == $p['id']) {
-			$span->addText('You are viewing the published version of this project.  Click ');
-			new link($span, 'project.php', 'here', array('id'=>$p['publishof']));
-			$span->addText(' for the latest unpublished version.');
-		} else {
-			$span->addText('You are viewing the unpublished project data. Changes are marked with red asterisks.  Click ');
-			new link($span, 'project.php', 'here', array('id'=>$latest['id']));
-			$span->addText(' for the published version.');
-		}
-		*/
 	}
 }
 
@@ -173,6 +161,26 @@ foreach ((array) $deleted as $ln) {
 	new red_asterisk($lnk);
 }
 
+
+$row = new row($table);
+$row->addCell('Project Team:', 'col1');
+ if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
+ 	if (checkperm('owner', $p['id'])) {
+ 		$row->addCell(new link($env, 'projectteam.php', '[ edit ]', array('id' => $p['id']), 'col2'));
+ 	} 
+ }
+
+$row = new row($table);
+$cell = $row->addCell( '', 'col1');
+$cell = $row->addCell( '', 'col2');
+$userList = db_layer::user_getmany();
+$settings = array(
+	'users' => $userList,
+	'projectteam' => $p['projectteam'],
+	'editable' => false
+);
+$ptControl = new projectTeamList($cell, $settings);
+
 // Attachments
 $row = new row($table);
 $row->addCell(" ");
@@ -208,25 +216,6 @@ $grp = new htmllist($sidebar, 'sidebarlist');
 
 if ($haspublishes) new link($grp, 'history.php', 'Project History', array('id'=>$histid));
 if (checkperm('editcurrent', $p['id']) && (!$ispublish || $p['id'] == $latest['id'])) new link($grp, 'editproject.php', 'Edit Project', array('id'=>$histid));
-
-// add a form submission for publishing the project
-// should not be a link as that would be a violation of the rule
-// against state change on GET
-/*
-if (!$p['publishof'] && checkperm('publish', $p['id']) && $p['complete'] != 'complete') {
-	if (form::check_error('publish', 10)) {
-		db_layer::project_publish($p['id'], $user->userid());
-		$doc->refresh(0, 'project.php', array('id'=>$p['id']));
-	}
-	$form = new form($env, 'publish', 'bottombutton');
-	$form->setid('publish');
-	new hidden($form, 'id', $p['id']);
-	$hid = new hidden($form, 'pwo_submit', 'Submit');
-
-	$lnk = new link($grp, '#', 'Publish Project');
-	$lnk->addJS('onclick', 'document.forms.publish.submit(); return false;');
-}
-*/
 
 if (checkperm('editcurrent', $p['id']) && !$ispublish && $p['complete'] != 'complete') {
 	if (checkperm('owner', $p['id'])) $rowFirst->addCell(new link($linksgrp, 'links.php', '[ edit ]', array('id'=>$histid)), 'col2');

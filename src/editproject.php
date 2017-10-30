@@ -8,6 +8,7 @@
 require_once("common.php");
 require_once("widgets/traitsform.php");
 require_once("widgets/contexthelp.php");
+require_once("widgets/projectTeamList.php");
 
 $doc = doc::getdoc();
 $env = new env($doc);
@@ -17,6 +18,7 @@ $doc->includeCSS('!jscal/calendar.css');
 $doc->includeJS('!jscal/calendar.js');
 $doc->includeJS('!jscal/calendar-en.js');
 $doc->includeJS('!jscal/calendar-setup.js');
+
 
 $p = db_layer::project_get(array('id'=>$_REQUEST['id']));
 $creating = !$p['id'];
@@ -86,6 +88,7 @@ if (form::check_error('project')) {
 		'quality'=>trait_data('quality', $p),
 		'overall'=>trait_data('overall', $p),
 		'comment'=>$_REQUEST['comment'],
+		'projectteam'=>$_REQUEST['projectteam'] ? $_REQUEST['projectteam'] : $p['projectteam'],
 		'commentdate'=>$commentdate
 	);
 	if (!$owner && $editing) {
@@ -99,6 +102,7 @@ if (form::check_error('project')) {
 			'activity'=>$p['activity'],
 			'activitydate'=>$p['activitydate'],
 			'comment'=>$p['comment'],
+			'projectteam'=>$p['projectteam'],
 			'commentdate'=>$p['commentdate'],
 			'scope'=>array(
 				'risk'=>$p['scope']['risk'],
@@ -291,8 +295,7 @@ function phasehide(sel) {
 	var ph = document.getElementById("phasefree");
 	if (sel.options[sel.selectedIndex].value == "custom") ph.style.display = "inline";
 	else ph.style.display = "none";
-}
-');
+	}');
 	$doc->addJS_afterload('phasehide(document.getElementById("phaseid"))');
 	$tbox = new textbox($form, 'phasefree', $p['phasefree'], 30);
 	$tbox->setid('phasefree');
@@ -335,6 +338,17 @@ function phasehide(sel) {
 	$tarea->setlabel('Status Update:');
 	if ($editing && !$owner) $tarea->disabled();
 	new contexthelp($form, array('id'=>'comment'));
+
+	$form->br(2);
+
+	//Project Team
+	$userList = db_layer::user_getmany();
+	$settings = array(
+		'users' => $userList,
+		'projectteam' => $$p['projectteam'],
+		'editable' => true
+	);
+	$ptControl = new projectTeamList($form, $settings);
 
 	$form->br(2);
 
