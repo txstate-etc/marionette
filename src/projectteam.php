@@ -56,17 +56,39 @@ $env->br(2);
 $form = new form($env, 'projectteam');
 new hidden($form, 'id', $p['id']);
 
+//Project Team
+//Existing members are represented by checkboxes, arranged in a flex container 
+//with 5 members per column
 if ($p['projectteam']) {
 	$existing = new fieldset($form, 'Delete Project Team Members');
-	foreach ($p['projectteam'] as $member) {
-		$box = new checkbox($existing, 'ptdelete', $member['userid']);
+
+	$doc->addCSS('.flex-container { 
+		display: flex; 
+		flex-flow: row wrap;
+		justify-content: flex-start;
+	}');
+	$doc->addCSS('.flex-item {
+		flex-basis: content;
+		align-items: flex-start;
+		padding: 5px;
+	}');
+
+	$flexdiv = new div($existing, "flex-container", "flex-container");
+	$flexitem = new div($flexdiv, "flex-item", "flex-item");
+
+	for ($flexitemIndex = 1; $flexitemIndex <= count($p['projectteam']); $flexitemIndex++) {
+		$member = $p['projectteam'][$flexitemIndex - 1];
+		$box = new checkbox($flexitem, 'ptdelete', $member['userid']);
 		$box->setlabel($member['displayname']);
 		$box->addJS("onchange", "document.getElementsByName('projectteam')[0].submit()");
-		$existing->br();
+		$flexitem->br();
+		if ($flexitemIndex % 5 == 0) { 
+			$flexitem = new div($flexdiv, "flex-item", "flex-item");
+		}
 	}
 }
 
-
+//Autocomplete box for adding new Project Team members
 $query = 'https://secure.its.txstate.edu/iphone/people/json.pl?q=CURRENTVAL&n=8';
 $netidquery = 'https://secure.its.txstate.edu/iphone/people/json.pl?q=userid%3ACURRENTVAL&n=4';
 $handler = '
