@@ -8,9 +8,9 @@
  */
 
 require_once("common.php");
-require_once("widgets/projectTeamList.php");
 
 $doc = doc::getdoc();
+$doc->addCSS("label { float:none; }");
 $env = new env($doc);
 
 $p = db_layer::project_get(array('id'=>$_REQUEST['id'], 'latestpublish' => !checkperm('viewcurrent', $_REQUEST['id'])));
@@ -170,6 +170,7 @@ $row->addCell('Project Team:', 'col1');
  	} 
  }
 
+//Project Team
 $row = new row($table);
 $cell = $row->addCell( '', 'col1');
 $cell = $row->addCell( '', 'col2');
@@ -179,7 +180,10 @@ $settings = array(
 	'projectteam' => $p['projectteam'],
 	'editable' => false
 );
-$ptControl = new projectTeamList($cell, $settings);
+foreach ($p['projectteam'] as $member) {
+	$lbl = new label($cell, $member['displayname']);
+	$cell->br();
+}
 
 // Attachments
 $row = new row($table);

@@ -1478,10 +1478,16 @@ class db_layer {
 	 */
 	public static function projectteam_get($projectid) {
 		$db = self::$db;
-		return $db->getall("SELECT pt.projectid, pt.userid, u.firstname, u.lastname, CONCAT(u.firstname,' ',u.lastname) AS displayname 
+		return $db->getall("SELECT pt.projectid, pt.userid, u.firstname, u.lastname, u.username,
+			CONCAT(u.firstname,' ',u.lastname) AS displayname 
 			FROM project_team pt 
 			INNER JOIN users u ON pt.userid = u.userid
 			WHERE pt.projectid=?", $projectid);
+	}
+
+	public static function projectteam_check($projectid, $userid) {
+		$existing = self::$db->get("SELECT $projectid FROM project_team WHERE projectid=? AND userid=?", $projectid, $userid);
+		return $existing ? true : false;
 	}
 
 	/**

@@ -8,7 +8,6 @@
 require_once("common.php");
 require_once("widgets/traitsform.php");
 require_once("widgets/contexthelp.php");
-require_once("widgets/projectTeamList.php");
 
 $doc = doc::getdoc();
 $env = new env($doc);
@@ -338,17 +337,6 @@ function phasehide(sel) {
 	$tarea->setlabel('Status Update:');
 	if ($editing && !$owner) $tarea->disabled();
 	new contexthelp($form, array('id'=>'comment'));
-
-	$form->br(2);
-
-	//Project Team
-	$userList = db_layer::user_getmany();
-	$settings = array(
-		'users' => $userList,
-		'projectteam' => $$p['projectteam'],
-		'editable' => true
-	);
-	$ptControl = new projectTeamList($form, $settings);
 
 	$form->br(2);
 
