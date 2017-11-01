@@ -1146,7 +1146,6 @@ class db_layer {
 		$resource = self::traits_update($data['resource']);
 		$quality = self::traits_update($data['quality']);
 		$overall = self::traits_update($data['overall']);
-		$projectteam = self::projectteam_update($data['id'], $data['projectteam']);
 
 		// update the project itself
 		$db->execute("UPDATE projects SET publishof=?, modified=NOW(), modifiedby=?, manager=?, name=?, master=?, goal=?, classification=?, unit=?,
