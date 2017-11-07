@@ -202,8 +202,6 @@ if (is_null($filtdata))
 
 	//If the user came to this page via a submit (aka - clicking the Apply Filters button)
 	//Then redirect to the parameterized URL...
-
-	//if(!is_null($_POST["pwo_submit"]))
 	if ($user->userid())
 	{
 		$URL = 'filtered.php';
@@ -211,10 +209,9 @@ if (is_null($filtdata))
 		if (strlen($qparms) != 0)
 		{
 			$URL = $URL . '?' . $qparms;
+			$doc->addJS("document.location.href='{$URL}");
+			echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
 		}
-
-		$doc->addJS("document.location.href='{$URL}");
-		echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $URL . '">';
 	}
 }
 
