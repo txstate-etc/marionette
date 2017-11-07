@@ -29,8 +29,16 @@ function getUserId($list, $username) {
 }
 
 function check_username ($username, $projectid = 0, $userid = 0) {
-	if (!db_layer::projectteam_check($userid, $projectid)) return '';
-	return ' already a member of the Project Team.';
+	$userList = db_layer::user_getmany();
+	if (db_layer::projectteam_check($userid, $projectid)) {
+		return ' already a member of the Project Team.';
+	}
+	foreach($userList as $u) {
+		if ($u['username'] == $username) {
+			return '';
+		}
+	}
+	return " $username has not been added as a Marionette User.";
 }
 
 if ($_REQUEST['ptdelete']) {

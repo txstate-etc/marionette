@@ -819,7 +819,7 @@ class db_layer {
 	* @return string
 	**/
 	public static function project_getcsv($filters = array()) {
-		$returnString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Modified, Risk, Timeline\r\n";
+		$returnString = "Target, Project, Portfolio, Level, Type, Phase, Lead, Project Team, Modified, Risk, Timeline\r\n";
 
 		// Ensure we are not paging db results. We want ALL results for the csv file
 		if ($filters['perpage']) { 
@@ -828,6 +828,12 @@ class db_layer {
 
 		$csvData = self::project_getmany($filters);
 		foreach ($csvData as $proj) {
+			$ptString = '';
+			foreach($proj['projectteam'] as $member) {
+				$ptString .= $member['displayname'] . ',';
+			}
+			$ptString = $ptString == '' ? 'None' : rtrim($ptString, ",");
+
 			$returnString .= self::cleanCsvString($proj['target']) . ",";
 			$returnString .= self::cleanCsvString($proj['name']) . ",";
 			$returnString .= self::cleanCsvString($proj['master_name']) . ",";
@@ -835,6 +841,7 @@ class db_layer {
 			$returnString .= self::cleanCsvString($proj['classification_name']) . ",";
 			$returnString .= self::cleanCsvString($proj['phase']) . ",";
 			$returnString .= self::cleanCsvString($proj['current_manager']) . ",";
+			$returnString .= self::cleanCsvString($ptString) . ",";
 			$returnString .= self::cleanCsvString($proj['modified']) . ",";
 			$returnString .= self::cleanCsvString($proj['overall']['status_name']) . ",";
 			$returnString .= self::cleanCsvString($proj['overall']['trend_name']) . "\r\n";
@@ -1481,7 +1488,8 @@ class db_layer {
 			CONCAT(u.firstname,' ',u.lastname) AS displayname 
 			FROM project_team pt 
 			INNER JOIN users u ON pt.userid = u.userid
-			WHERE pt.projectid=?", $projectid);
+			WHERE pt.projectid=?
+			ORDER BY displayname ASC", $projectid);
 	}
 
 	public static function projectteam_check($projectid, $userid) {

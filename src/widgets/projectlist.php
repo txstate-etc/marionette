@@ -24,6 +24,11 @@ class project_list extends widget {
 		else $trow->addSortable("Phase", 'phase', 'phase');
 		if (!$sortable) $trow->addCell("Lead", 'pm');
 		else $trow->addSortable("Lead", 'manager_name', 'pm');
+
+
+		$trow->addCell("Project Team", 'projectteam');
+
+
 		if (!$sortable) $trow->addCell("Modified", 'modified');
 		else $trow->addSortable("Modified", 'modified', 'date');
 		if (!$sortable) $trow->addCell("Risk", 'status');
@@ -46,11 +51,22 @@ class project_list extends widget {
 				$cell->addText("\n(Completion Request)", 'extrainfo');
 			}
 
+			$ptString = '';
+			foreach($p['projectteam'] as $member) {
+				$ptString .= $member['displayname'] . ',';
+			}
+			$ptString = $ptString == '' ? 'None' : rtrim($ptString, ",");
+
 			$row->addCell($p['master_name'], 'portfolio');
 			$row->addCell($p['unit_abbr'], 'area');
 			$row->addCell($p['classification_name'], 'type');
 			$row->addCell($p['phase'], 'phase');
 			$row->addCell($p['current_manager'], 'pm');
+
+
+			$row->addCell($ptString, 'projectteam');
+
+
 			$published = date_from_database($p['modified']);
 			$row->addCell(relative_date($published, TRUE, TRUE), 'modified');
 			$row->addCell('  ', 'status'.strToLower($p['overall']['status_name']));
